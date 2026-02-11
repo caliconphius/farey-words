@@ -1,0 +1,4 @@
+[display]
+separator = "*"
+inverse_symbol = "uppercase"
+show_powers = true
