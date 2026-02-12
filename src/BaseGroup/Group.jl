@@ -82,7 +82,7 @@ Base.in(g::Symbol, F::Group) = (g∈F.gens || g∈F.invs)
     Gen(F::G,name::Symbol) where G<:Group = Gen(F, name, 1)
     Gen(F::G,gen::Gen{G}) where G<:Group = Gen(F, gen.name, gen.value)
 
-    function Base.:*(x::Gen{G}, y::Gen{G})::GrpElem{G} where G<:Group
+    function Base.:*(x::GrpElem{G}, y::GrpElem{G})::GrpElem{G} where G<:Group
         y.Group<x.Group || error("$(y.Group) is not a subgroup of $(x.Group)")
         elem_x = GrpElem(x)
         push!(elem_x, y)

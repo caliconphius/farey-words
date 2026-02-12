@@ -1,0 +1,1 @@
+struct Monoid{T} end
