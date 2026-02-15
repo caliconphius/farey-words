@@ -1,4 +1,5 @@
-using Farey
+# using Farey
+using Base.Iterators
 # F2 = @freeGroup f g
 # (f,g) = generator_list(F2)
 
@@ -6,7 +7,7 @@ using Farey
 # f/g
 
 begin
-L = [1,2]
+L = [1,2,2]
 @show cont_to_quot(L)
 ω = s_seq(L) .|> collect 
 Ω = ω[2]    

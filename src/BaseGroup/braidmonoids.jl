@@ -1,5 +1,5 @@
 using Chevie
-W = coxgroup(:A,2)
+W = coxgroup(:A,4)
 B = BraidMonoid(W)
 
 

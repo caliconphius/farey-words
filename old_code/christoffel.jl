@@ -77,8 +77,9 @@ L = [1,2]
 Ω = ω[2]    
 end
 Ω |> tau(2) |> tau(1) |> adjoint
+[1,3,2,2] |> cont_to_quot
 s_seq([2,2,2]) .|> collect 
-s_seq([1,3,2,2]) .|> collect |> x->x[1]  |> adjoint
-
+s_seq([1,3,2,2]) .|> collect |> x->x[2]  |> adjoint
+reinterpret(UInt, [1,1])
 GroupGen(:f)
 
