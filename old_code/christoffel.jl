@@ -76,9 +76,9 @@ L = [1,2]
 ω = s_seq(L) .|> collect 
 Ω = ω[2]    
 end
-tau(Ω, 1)
-s_seq([1,2,2]) .|> collect 
-s_seq([1,1,2]) .|> collect 
+Ω |> tau(2) |> tau(1) |> adjoint
+s_seq([2,2,2]) .|> collect 
+s_seq([1,3,2,2]) .|> collect |> x->x[1]  |> adjoint
 
 GroupGen(:f)
 
