@@ -85,10 +85,11 @@ end
 #     prod(fill(f1*f2, N÷2)) * (N%2==1 ? f : id)
 # end
 
-_M2 = FreeGroup("a", "b")
-_m1, _m2 = [_M2(x) for x in 1:_M2.ngens]
+
 
 function s_seq(c::ContinuedFraction)
+    _M2 = FreeGroup("a", "b")
+    _m1, _m2 = [_M2(x) for x in 1:_M2.ngens]
     ContinuedFraction(c)
     c.leading==0 || @warn "Farey is currently only implemented for rationals <= 1"
     ω = christoffel(c, _m1, _m2)^2
