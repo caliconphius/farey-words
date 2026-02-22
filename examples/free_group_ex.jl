@@ -23,8 +23,9 @@ christoffel(3, 5, a, a^b)
 
 
 s_seq(3//5)
-u = christoffel(3//5,a,b).Ω
-u = christoffel(0//1,a,b).Ω
-(u.word)
+u = christoffel(3//5,a,b)
+u = christoffel(0//1,a,b)
+
+
 
 Q =(3//5)
