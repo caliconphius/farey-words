@@ -1,7 +1,6 @@
 module Farey
 const DOT = "·"
 import Match, TOML, UnicodeFun
-import StarAlgebras as SA
 import KnuthBendix as KB
 import KnuthBendix.FPMonoids as MON
 import GroupsCore as GPC
@@ -12,7 +11,7 @@ Base.inv(f::T) where T <: GPC.MonoidElement =  f.parent(KB.inv(f.word, f.parent.
 import Base.Iterators as ITR
 
 export ITR
-export KB, MON, GPC, SA, inv
+export KB, MON, GPC, inv
 export FreeGroup
 export s_seq
 export christoffel, Hom, palindrome, pretty_rep

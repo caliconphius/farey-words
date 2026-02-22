@@ -3,8 +3,6 @@ using Farey
 
 F2ab = FreeGroup(:a, :b)
 F2 = FreeGroup((;:f=>:F, :g=>:G))
-F2 = FreeGroup(:f, :g)
-# F2 = FreeGroup(2)
 
 f, g = GPC.gens(F2)
 F, G = GPC.gens(F2) .|> inv

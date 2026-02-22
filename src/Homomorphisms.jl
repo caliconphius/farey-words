@@ -13,7 +13,7 @@ struct Hom{G1<:GPC.Group, G2<:GPC.Group, TYP<:AnyHom}
     #         (only(H1(x).word)|>Int => H2(y).word) =>
     #         (only(inv(H1(x)).word)|>Int => inv(H2(y)).word)
     #     end
-    #     image = Dict(join([first.(image)]))
+    #     image = Dict(join([first.(    image)]))
         
     #     new{G1, G2, MonoidHom}(H1, H2, image)
     # end
