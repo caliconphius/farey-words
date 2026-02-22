@@ -5,6 +5,7 @@ struct ContinuedFraction{T}<:Number where T<:Integer
     L::Vector{T}
     length::UInt
     function ContinuedFraction(first::S, L::Vector{T}) where {S<:Integer, T<:Integer}
+        isempty(L) && return new{DEFAULT_INT}(DEFAULT_INT(first), DEFAULT_INT[], 2)
         L[1] == 0 && return new{DEFAULT_INT}(DEFAULT_INT(0), DEFAULT_INT[0], 2)
         last(L) == 1 && begin
             if length(L) == 1
