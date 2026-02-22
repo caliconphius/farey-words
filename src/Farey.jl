@@ -1,83 +1,32 @@
 module Farey
-using Match, Base.Iterators, Configurations, TOML
-# export @freeGroup, generator_list, GrpElem, FreeGroup, Gen
-include("BaseGroup/BaseGroup.jl")
+const DOT = "·"
+import Match, TOML, UnicodeFun
+# import Chevie as CHV
+import StarAlgebras as SA
+import KnuthBendix as KB
+import KnuthBendix.FPMonoids as MON
+# import KnuthBendix:inv
+import GroupsCore as GPC
 
-# Write your package code here.
+import KnuthBendix.Words as WD
 
-using Base.Iterators
-
-
-function cont_fraction(Q::Rational)::Vector{Int}
-    L = []
-    while Q!=0//1
-        l0 = (1÷Q)
-        push!(L, l0)
-        Q = 1/Q - l0
-    end
-    L
-
-end
-
-function cont_to_quot(L::Vector{Int})::Rational
-    reduce((a,b)->1//(a+b), reverse(L[1:end-1]), init=1//L[end])
-    
-end
-
-function s_seq(L::Vector{Int})
-    Ω0 = only([L[1]+1])
-    Ω1 = only([L[1]])
-    
-    if length(L)==1
-         return Ω1 
-    end
-    L[2] -= 1
-
-    # Ω1 = flatten((L[1]+1, cycle(L[1], L[2]-1)))
-    Ω = Ω1
-    Ω_induct = ((Ω0, Ω1, Ω), (k,l)) -> 
-        (
-            Ω1,
-            (k%2==1) ? 
-                flatten((Ω0, cycle(Ω1, l))) : 
-                flatten((cycle(Ω1, l), Ω0)),
-            Ω0
-        )
-
-    Ω = foldl(Ω_induct, enumerate(L[2:end]), init=(Ω0, Ω1, Ω))
-
-    Ω .|> collect
-end 
+Base.inv(f::T) where T <: GPC.MonoidElement =  f.parent(KB.inv(f.word, f.parent.alphabet))
 
 
+import Base.Iterators as ITR
 
-# function palindrome_word(N::Int, f1::GroupGen = f, f2::GroupGen = g)::GroupElem
-#     prod(fill(f1*f2, N÷2)) * (N%2==1 ? f : id)
-# end
+export ITR
+export KB, MON, GPC, WD, SA, inv
+# export CHV, SA
+export FreeGroup
+export s_seq, sigma, tau
+export christoffel, Hom, palindrome, pretty_rep
+export ContinuedFraction, shrink_cf, farey_word, @cf0, @cf, ⊕, ⊖,farey_neighbours
 
-# function farey_word(Q::Rational)::GroupElem
-#     L = cont_fraction(Q)
-#     S = s_seq(L)
-#     full_s_seq = vcat(S, S)
-    
-
-# end
-
-
-# function sigma(S::Vector{Int}, m::Int)::Vector{Int}
-#     flatmap(S) do x
-#         vcat(repeat([m+1], x),[m])
-#     end |> collect
-# end
-
-# function tau(S::Vector{Int}, m::Int)::Vector{Int}
-#     flatmap(S) do x
-#         vcat(repeat([m], x),[m+1])
-#     end |> collect |> reverse
-# end
-
-
-
+include("FreeGroup.jl")
+include("Homomorphisms.jl")
+include("ContinuedFractions.jl")
+include("FareyWords.jl")
 
 
 

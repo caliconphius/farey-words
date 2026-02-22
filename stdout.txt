@@ -1,0 +1,250 @@
+./out.txt    Continued Fraction: [2, 5, 2], 
+    Rational Expansion: 11//24,
+    Original Rational: 11//24
+
+
+./out.txt    Continued Fraction: [2, 8, 2], 
+    Rational Expansion: 17//36,
+    Original Rational: 17//36
+
+
+./out.txt    Continued Fraction: [2, 11, 2], 
+    Rational Expansion: 23//48,
+    Original Rational: 23//48
+
+
+./out.txt    Continued Fraction: [2, 14, 2], 
+    Rational Expansion: 29//60,
+    Original Rational: 29//60
+
+
+./out.txt    Continued Fraction: [2, 17, 2], 
+    Rational Expansion: 35//72,
+    Original Rational: 35//72
+
+
+./out.txt    Continued Fraction: [2, 20, 2], 
+    Rational Expansion: 41//84,
+    Original Rational: 41//84
+
+
+./out.txt    Continued Fraction: [2, 23, 2], 
+    Rational Expansion: 47//96,
+    Original Rational: 47//96
+
+
+./out.txt    Continued Fraction: [2, 26, 2], 
+    Rational Expansion: 53//108,
+    Original Rational: 53//108
+
+
+./out.txt    Continued Fraction: [2, 29, 2], 
+    Rational Expansion: 59//120,
+    Original Rational: 59//120
+
+
+./out.txt    Continued Fraction: [2, 32, 2], 
+    Rational Expansion: 65//132,
+    Original Rational: 65//132
+
+
+./out.txt    Continued Fraction: [2, 35, 2], 
+    Rational Expansion: 71//144,
+    Original Rational: 71//144
+
+
+./out.txt    Continued Fraction: [2, 38, 2], 
+    Rational Expansion: 77//156,
+    Original Rational: 77//156
+
+
+./out.txt    Continued Fraction: [2, 41, 2], 
+    Rational Expansion: 83//168,
+    Original Rational: 83//168
+
+
+./out.txt    Continued Fraction: [2, 44, 2], 
+    Rational Expansion: 89//180,
+    Original Rational: 89//180
+
+
+./out.txt    Continued Fraction: [2, 47, 2], 
+    Rational Expansion: 95//192,
+    Original Rational: 95//192
+
+
+./out.txt    Continued Fraction: [2, 50, 2], 
+    Rational Expansion: 101//204,
+    Original Rational: 101//204
+
+
+./out.txt    Continued Fraction: [2, 53, 2], 
+    Rational Expansion: 107//216,
+    Original Rational: 107//216
+
+
+./out.txt    Continued Fraction: [2, 56, 2], 
+    Rational Expansion: 113//228,
+    Original Rational: 113//228
+
+
+./out.txt    Continued Fraction: [2, 59, 2], 
+    Rational Expansion: 119//240,
+    Original Rational: 119//240
+
+
+./out.txt    Continued Fraction: [2, 62, 2], 
+    Rational Expansion: 125//252,
+    Original Rational: 125//252
+
+
+./out.txt    Continued Fraction: [2, 65, 2], 
+    Rational Expansion: 131//264,
+    Original Rational: 131//264
+
+
+./out.txt    Continued Fraction: [2, 68, 2], 
+    Rational Expansion: 137//276,
+    Original Rational: 137//276
+
+
+./out.txt    Continued Fraction: [2, 71, 2], 
+    Rational Expansion: 143//288,
+    Original Rational: 143//288
+
+
+./out.txt    Continued Fraction: [2, 74, 2], 
+    Rational Expansion: 149//300,
+    Original Rational: 149//300
+
+
+./out.txt    Continued Fraction: [2, 77, 2], 
+    Rational Expansion: 155//312,
+    Original Rational: 155//312
+
+
+./out.txt    Continued Fraction: [2, 80, 2], 
+    Rational Expansion: 161//324,
+    Original Rational: 161//324
+
+
+./out.txt    Continued Fraction: [2, 83, 2], 
+    Rational Expansion: 167//336,
+    Original Rational: 167//336
+
+
+./out.txt    Continued Fraction: [2, 86, 2], 
+    Rational Expansion: 173//348,
+    Original Rational: 173//348
+
+
+./out.txt    Continued Fraction: [2, 89, 2], 
+    Rational Expansion: 179//360,
+    Original Rational: 179//360
+
+
+./out.txt    Continued Fraction: [2, 92, 2], 
+    Rational Expansion: 185//372,
+    Original Rational: 185//372
+
+
+./out.txt    Continued Fraction: [2, 95, 2], 
+    Rational Expansion: 191//384,
+    Original Rational: 191//384
+
+
+./out.txt    Continued Fraction: [2, 98, 2], 
+    Rational Expansion: 197//396,
+    Original Rational: 197//396
+
+
+./out.txt    Continued Fraction: [2, 101, 2], 
+    Rational Expansion: 203//408,
+    Original Rational: 203//408
+
+
+./out.txt    Continued Fraction: [2, 104, 2], 
+    Rational Expansion: 209//420,
+    Original Rational: 209//420
+
+
+./out.txt    Continued Fraction: [2, 107, 2], 
+    Rational Expansion: 215//432,
+    Original Rational: 215//432
+
+
+./out.txt    Continued Fraction: [2, 110, 2], 
+    Rational Expansion: 221//444,
+    Original Rational: 221//444
+
+
+./out.txt    Continued Fraction: [2, 113, 2], 
+    Rational Expansion: 227//456,
+    Original Rational: 227//456
+
+
+./out.txt    Continued Fraction: [2, 116, 2], 
+    Rational Expansion: 233//468,
+    Original Rational: 233//468
+
+
+./out.txt    Continued Fraction: [2, 119, 2], 
+    Rational Expansion: 239//480,
+    Original Rational: 239//480
+
+
+./out.txt    Continued Fraction: [2, 122, 2], 
+    Rational Expansion: 245//492,
+    Original Rational: 245//492
+
+
+./out.txt    Continued Fraction: [2, 125, 2], 
+    Rational Expansion: 251//504,
+    Original Rational: 251//504
+
+
+./out.txt    Continued Fraction: [2, 128, 2], 
+    Rational Expansion: 257//516,
+    Original Rational: 257//516
+
+
+./out.txt    Continued Fraction: [2, 131, 2], 
+    Rational Expansion: 263//528,
+    Original Rational: 263//528
+
+
+./out.txt    Continued Fraction: [2, 134, 2], 
+    Rational Expansion: 269//540,
+    Original Rational: 269//540
+
+
+./out.txt    Continued Fraction: [2, 137, 2], 
+    Rational Expansion: 275//552,
+    Original Rational: 275//552
+
+
+./out.txt    Continued Fraction: [2, 140, 2], 
+    Rational Expansion: 281//564,
+    Original Rational: 281//564
+
+
+./out.txt    Continued Fraction: [2, 143, 2], 
+    Rational Expansion: 287//576,
+    Original Rational: 287//576
+
+
+./out.txt    Continued Fraction: [2, 146, 2], 
+    Rational Expansion: 293//588,
+    Original Rational: 293//588
+
+
+./out.txt    Continued Fraction: [2, 149, 2], 
+    Rational Expansion: 299//600,
+    Original Rational: 299//600
+
+
+./out.txt    Continued Fraction: [2, 152, 2], 
+    Rational Expansion: 305//612,
+    Original Rational: 305//612
+
+
