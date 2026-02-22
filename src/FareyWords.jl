@@ -1,26 +1,5 @@
 using Base.Iterators
 
-# function cont_fraction(Q::Rational)::Vector{Int}
-#     L = []
-#     while Q!=0//1
-#         l0 = (1÷Q)
-#         push!(L, l0)
-#         Q = 1/Q - l0
-#     end
-#     L
-
-# end
-
-# function cont_to_quot(L::Vector{Int})::Rational
-#     reduce((a,b)->1//(a+b), reverse(L[1:end-1]), init=1//L[end])
-    
-# end
-
-# function christoffel(L::ContinuedFraction, a::FreeGroupElement,b::FreeGroupElement)
-#     if Rational(L)<1
-# end
-
-
 
 function christoffel(X::Number, a::GPC.MonoidElement,b::GPC.MonoidElement)
     Q = ContinuedFraction(X) 

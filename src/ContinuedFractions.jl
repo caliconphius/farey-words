@@ -3,9 +3,21 @@ const DEFAULT_INT = Int
 struct ContinuedFraction{T}<:Number where T<:Integer 
     leading::T
     L::Vector{T}
-    length::Integer
-    ContinuedFraction(first::S, L::Vector{T}) where {S, T}  = L[1]==0 ? new{DEFAULT_INT}(DEFAULT_INT(0), DEFAULT_INT.([0]), 2) : new{DEFAULT_INT}(DEFAULT_INT(first), DEFAULT_INT.(L), length(L)+1)
-    # ContinuedFraction(first::T, L::Vector{T}) where {T<:Integer} = new{T}(first, L, length(L)+1)
+    length::UInt
+    function ContinuedFraction(first::S, L::Vector{T}) where {S<:Integer, T<:Integer}
+        L[1] == 0 && return new{DEFAULT_INT}(DEFAULT_INT(0), DEFAULT_INT[0], 2)
+        last(L) == 1 && begin
+            if length(L) == 1
+                first+=1
+                L = []
+            else
+                L[end-1] += 1
+                L = L[1:end-1]
+            end
+        end
+
+        new{DEFAULT_INT}(DEFAULT_INT(first), DEFAULT_INT.(L), length(L)+1)
+    end
 end
 const QNumber = Union{Real, ContinuedFraction}
 
@@ -36,9 +48,13 @@ macro cf0(expr)
     :(ContinuedFraction((0) , $expr))    
 end
 
-macro cf(expr)
-    expr.args[1]==:// && return :(ContinuedFraction($expr))
-    :(ContinuedFraction($expr[1], $expr[2:end]))
+macro cf(sym::Symbol)
+    :(ContinuedFraction($(esc(sym))))
+end
+
+macro cf(expr::Base.Expr)
+    expr.head==:vect && return :(ContinuedFraction($expr[1], $expr[2:end]))
+    :(ContinuedFraction($(esc(expr))))
 end
 
 # macro cf(sym, expr)
@@ -85,46 +101,45 @@ end
 Base.promote_rule(::Type{Rational{T}}, ::Type{ContinuedFraction{S}}) where {T<:Integer, S<:Integer} = Rational{promote_type(T,S)}
 Base.promote_rule(::Type{T}, ::Type{ContinuedFraction{S}}) where {T<:Integer, S<:Integer} = Rational{promote_type(T,S)}
 Base.promote_rule(::Type{ContinuedFraction{T}}, ::Type{S}) where {T<:Integer, S<:AbstractFloat} = Base.promote_type(Rational{T},S)
+
+
 function Base.:(*)(c::ContinuedFraction, d::ContinuedFraction) 
-    return ContinuedFraction(c*d)
+    r = Rational(c); s = Rational(d)    
+    return ContinuedFraction(r * s)
 end
 
 function Base.:(/)(c::ContinuedFraction, d::ContinuedFraction)
-    r = Rational(c); s = Rational(d)
-    
+    r = Rational(c); s = Rational(d)    
     return ContinuedFraction(r/s)
 end
 
 function Base.:(^)(c::ContinuedFraction, n::Integer)
     r = Rational(c)
-    
     return ContinuedFraction(r^n)
 end
 
 function Base.:(+)(c::ContinuedFraction, d::ContinuedFraction)
-    r = Rational(c); s = Rational(d)
-    
+    r = Rational(c); s = Rational(d)    
     return ContinuedFraction(r+s)
 end
 
+function Base.:(-)(c::ContinuedFraction, d::ContinuedFraction)
+    r = Rational(c); s = Rational(d)
+    return ContinuedFraction(r-s)
+end
 
 function Base.inv(c::ContinuedFraction)
     return ContinuedFraction(1/c)
 end
 
-function farey_neighbours(p::Number)
-    p = ContinuedFraction(p)
-    q1 = ContinuedFraction(p.leading, p[2:end-1])
-    q2 = ContinuedFraction(p.leading, [p[2:end-1]..., p[end]-1])
-    q1, q2, q1⊖ q2
-end
 
 function ⊕(p::Number, q::Number)
     (r, s, t, u) = ITR.flatmap(sort(Rational[p, q], rev=true)) do x
         [x.num, x.den]
     end |> collect
     
-    r * u - s * t == 1 || error("$p and $q are not farey neighbours")
+
+    abs(r * u - s * t) == 1 || error("$p and $q are not farey neighbours")
 
     return (r+t)//(s+u) |> ContinuedFraction
 end
@@ -134,7 +149,14 @@ function ⊖(p::Number, q::Number)
         [x.num, x.den]
     end |> collect
     
-    r * u - s * t == 1 || error("$p and $q are not farey neighbours")
+    abs(r * u - s * t) == 1 || error("$p and $q are not farey neighbours")
 
     return (r-t)//(s-u) |> ContinuedFraction
+end
+
+function farey_neighbours(p::Number)
+    p = ContinuedFraction(p)
+    q1 = ContinuedFraction(p.leading, p[2:end-1])
+    q2 = ContinuedFraction(p.leading, [p[2:end-1]..., p[end]-1])
+    q1, q2, q1⊖ q2
 end

@@ -3,8 +3,7 @@ struct FreeGroup<: GPC.Group
     ngens::UInt
     monoid::GPC.Monoid
     alphabet::KB.Alphabet
-    name::Union{Nothing, Symbol}
-    FreeGroup(ngens::Integer, mon::GPC.Monoid; name = nothing) = new(ngens, mon, mon.alphabet, nothing)
+    FreeGroup(ngens::Integer, mon::GPC.Monoid) = new(ngens, mon, mon.alphabet)
 end
 
 struct FreeGroupElement <: GPC.GroupElement
@@ -54,7 +53,6 @@ end
 
 function FreeGroup(Sym::NamedTuple)
     N = length(keys(Sym))
-    # gens = rev ? [reverse(keys(Sym)|>collect)..., reverse(values(Sym)|>collect)...] : [keys(Sym)..., values(Sym)...]
     gens = [Symbol.(keys(Sym))..., Symbol.(values(Sym))...]
     A = KB.Alphabet(gens)
     for pair in pairs(Sym)
@@ -84,16 +82,13 @@ function FreeGroup(N::Integer; lett="g")
     FreeGroup(syms)
 end 
 
-# Base.repr(x::FreeGroupElement) = KB.print_repr(io, x.word, x.parent.alphabet)
-
 function Base.show(io::IO, C::FreeGroup)
     if get(io, :compact, false)::Bool
         repr_string =  "Free group: ⟨"*join(repr.(GPC.gens(C)), ",")*"⟩"
     else
         gens = join(repr.(GPC.gens(C)), ",")
-        group_name = isnothing(C.name) ? "" : "$(C.name) = "
         invs = join(repr.(inv.(GPC.gens(C))), ",")
-        repr_string =  """Free Group on $(C.ngens) generators \t: $group_name⟨$gens⟩
+        repr_string =  """Free Group on $(C.ngens) generators \t: ⟨$gens⟩
         With inverse symbols \t\t: [$(invs)]"""
     end
     print(io,repr_string )
@@ -107,5 +102,4 @@ function pretty_rep(c::FreeGroupElement)
     pretty = replace(unpretty, "*" =>  ".") |> 
         UnicodeFun.to_latex
     pretty
-    # replace(x->isdigit(x) ? UnicodeFun.to_superscript(x) : x, unpretty|>collect) |> join
 end
