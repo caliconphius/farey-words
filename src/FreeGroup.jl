@@ -6,11 +6,15 @@ struct FreeGroup<: GPC.Group
     FreeGroup(ngens::Integer, mon::GPC.Monoid) = new(ngens, mon, mon.alphabet)
 end
 
-struct FreeGroupElement <: GPC.GroupElement
-    word::KB.Words.AbstractWord
+struct FreeGroupElement <: GPC.GroupElement 
+    word::KB.Words.Word{UInt}
     elem::GPC.MonoidElement
     parent::FreeGroup
-    FreeGroupElement(word::KB.Words.AbstractWord, F::FreeGroup) = new(word, F.monoid(word), F)
+    function FreeGroupElement(word::KB.Words.AbstractWord, F::FreeGroup)
+        element = F.monoid(word)
+        MON.normalform!(element)
+        new(element.word, element, F)
+    end
 end
 
 (F::FreeGroup)(x::KB.Words.AbstractWord) = FreeGroupElement(x, F)
@@ -39,9 +43,9 @@ function Base.inv(g::FreeGroupElement)
 end
 
 function Base.:(*)(g::FreeGroupElement, h::FreeGroupElement)
-    h = g.parent(h.word)
+    h_elem = g.elem.parent(h.word)
     C = parent(g)
-    return C(g.word*h.word)
+    return C(g.elem*h_elem)
 end
 
 
@@ -99,7 +103,8 @@ end
 
 function pretty_rep(c::FreeGroupElement)
     unpretty = repr(c.parent.monoid(c.word))
-    pretty = replace(unpretty, "*" =>  ".") |> 
-        UnicodeFun.to_latex
+    pretty =    replace(unpretty, "*" =>  ".") |> 
+                x -> replace(x, r"([0-9]+)" =>  s"{\1}") |> 
+                UnicodeFun.to_latex
     pretty
 end
