@@ -15,7 +15,6 @@ a, b = GPC.gens(F2ab)
 )) 
 
 
-
 ϕ(f*g*f^(g^2))
 
 christoffel(3, 5, a, a^b)
@@ -27,5 +26,5 @@ u = christoffel(3//5,a,b)
 u = christoffel(0//1,a,b)
 
 
-
-Q =(3//5)
+Q = @cf 2//15
+s_seq(Q) 
