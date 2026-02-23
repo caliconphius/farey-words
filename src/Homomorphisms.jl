@@ -5,7 +5,7 @@ const AnyHom = Union{GroupHom, MonoidHom}
 struct Hom{G1<:GPC.Group, G2<:GPC.Group, TYP<:AnyHom} 
     dom::G1
     codom::G2
-    image::Dict{Int, KB.Words.AbstractWord}
+    image::Dict{UInt, KB.Words.AbstractWord}
     # function Hom(H1::G1, H2::G2, ϕ::NTuple{N, Pair}) where {G1<:GPC.Monoid, G2<:GPC.Monoid, N} 
 
     #     image = ITR.map(ϕ) do x, y
@@ -22,8 +22,8 @@ struct Hom{G1<:GPC.Group, G2<:GPC.Group, TYP<:AnyHom}
         image = ITR.flatmap(ϕ) do pair
             x, y = pair
             # length(H1(x).word) > 1 && error("$x is not a generator of $(repr(H1, context=IOContext(io, :compact=>true)))")
-            (only(H1(x).word)|>Int => H2(y).word),
-            (only(inv(H1(x)).word)|>Int => inv(H2(y)).word)
+            (only(H1(x).word) => H2(y).word),
+            (only(inv(H1(x)).word) => inv(H2(y)).word)
         end |> Dict
         
 
