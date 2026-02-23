@@ -49,7 +49,7 @@ macro cf0(expr)
     :(ContinuedFraction((0) , $expr))    
 end
 
-macro cf(sym::Symbol)
+macro cf(sym::Union{Symbol, Number})
     :(ContinuedFraction($(esc(sym))))
 end
 
@@ -66,7 +66,7 @@ end
 
 
 function ContinuedFraction(Q::T) where T<:Real 
-    typeof(Q)<:AbstractFloat && @warn "Converting "*(ITR.take("$(Q)",4)|>join)*"... of type $(typeof(Q)) to a rational, results may suffer from floating point errors. Write p//q for exact division"
+    typeof(Q)<:AbstractFloat && @warn "Converting "*(ITR.take("$(Q)",8)|>join)*"... of type $(typeof(Q)) to a rational, results may suffer from floating point errors. Write p//q for exact division"
     ContinuedFraction(Rational(Q))
 end
 
@@ -86,6 +86,7 @@ Base.convert(::Type{T}, x::ContinuedFraction{S}) where {T<:Real, S<:Integer} = T
 
 
 function _rational(x::ContinuedFraction)
+    (isempty(x.L)) && return x.leading//1
     (x.L[1]==0) && return 1//0
     reduce(x|>collect|>reverse) do q,l
         l + 1//q
