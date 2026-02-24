@@ -58,7 +58,7 @@ end
 function s_seq(c::ContinuedFraction)
     _M2 = FreeGroup("a", "b")
     _m1, _m2 = [_M2(x) for x in 1:_M2.ngens]
-    c.leading==0 || length(c.L)==1 || @warn "Farey is currently only implemented for positive rationals <= 1, results for numbers outside this range may be inaccurate"
+    c.leading==0 || length(c.L)==1 || @error "Farey words/S sequences are currently only implemented for positive rationals <= 1, results for numbers outside this range may be inaccurate"
     ω = christoffel(c, _m1, _m2)^2
     ω.parent.monoid(ω.word)                     |>
         repr                                    |>
@@ -71,6 +71,7 @@ function s_seq(c::ContinuedFraction)
  end
 
  function s_seq(c::Number)
+    0<= c <= 1 || @error "Farey words/S sequences are currently only implemented for positive rationals <= 1, results for numbers outside this range may be inaccurate"
     s_seq(ContinuedFraction(c))
  end
 
