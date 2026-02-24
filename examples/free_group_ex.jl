@@ -1,6 +1,6 @@
 using Farey
 # computing in FreeGroups/Monoids!
-FreeGroup(3)
+FreeGroup(3) 
 
 F2ab = FreeGroup(:a, :b)
 F2 = FreeGroup((;:f=>:F, :g=>:G))
@@ -25,6 +25,8 @@ s_seq(3//5)
 u = christoffel(3//5,a,b)
 u = christoffel(0//1,a,b)
 
+farey_word(1//10, f, g)
+
 
 Q = @cf 2//15
-s_seq(Q) 
+s_seq(1//10) 

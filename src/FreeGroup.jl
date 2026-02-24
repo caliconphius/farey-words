@@ -104,7 +104,7 @@ end
 function pretty_rep(c::FreeGroupElement)
     unpretty = repr(c.parent.monoid(c.word))
     pretty = unpretty                                       |>
-                x-> replace(x, "*" =>  ".")                 |> 
+                x -> replace(x, "*" =>  ".")                |> 
                 x -> replace(x, r"\^(\d+)" =>  s"^{\1}")    |> 
                 UnicodeFun.to_latex
     pretty
