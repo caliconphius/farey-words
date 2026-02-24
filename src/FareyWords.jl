@@ -1,7 +1,7 @@
 using Base.Iterators
 
 
-function christoffel(X::Number, a::GPC.MonoidElement,b::GPC.MonoidElement)
+function christoffel(X::Number, a::AbstractElement,b::AbstractElement)
     Q = ContinuedFraction(X) 
 
     # @Match.Match Rational(Q) begin
@@ -66,9 +66,8 @@ function s_seq(c::ContinuedFraction)
         x-> replace(x, r"a\^(\d+)\*b"=>s"\1")   |>
         x-> split(x, "*")                      .|>
         x-> parse(Int, x)
+end
 
-
- end
 
  function s_seq(c::Number)
     0<=c<=1 || error("Farey words/S sequences are currently only implemented for positive rationals <= 1, results for numbers outside this range may be inaccurate")

@@ -1,12 +1,12 @@
 
-struct FreeGroup<: GPC.Group 
+struct FreeGroup<: AbstractGroup 
     ngens::UInt
     monoid::GPC.Monoid
     alphabet::KB.Alphabet
     FreeGroup(ngens::Integer, mon::GPC.Monoid) = new(ngens, mon, mon.alphabet)
 end
 
-struct FreeGroupElement <: GPC.GroupElement 
+struct FreeGroupElement <: AbstractGroupElement
     word::KB.Words.Word{UInt}
     elem::GPC.MonoidElement
     parent::FreeGroup

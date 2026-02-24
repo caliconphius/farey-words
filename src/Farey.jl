@@ -1,9 +1,14 @@
 module Farey
 const DOT = "·"
-import Match, TOML, UnicodeFun
 import KnuthBendix as KB
 import KnuthBendix.FPMonoids as MON
 import GroupsCore as GPC
+
+include("GroupInterface.jl")
+
+using .Interfaces:AbstractGroup, AbstractMonoid, AbstractElement, AbstractGroupElement, AbstractMonoidElement
+import Match, TOML, UnicodeFun
+
 
 Base.inv(f::T) where T <: GPC.MonoidElement =  f.parent(KB.inv(f.word, f.parent.alphabet))
 
