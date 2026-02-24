@@ -58,15 +58,14 @@ end
 function s_seq(c::ContinuedFraction)
     _M2 = FreeGroup("a", "b")
     _m1, _m2 = [_M2(x) for x in 1:_M2.ngens]
-    ContinuedFraction(c)
-    (c.leading==0 && length(c.L)!=1) || @warn "Farey is currently only implemented for positive rationals <= 1, results for numbers outside this range may be inaccurate"
+    c.leading==0 || length(c.L)==1 || @warn "Farey is currently only implemented for positive rationals <= 1, results for numbers outside this range may be inaccurate"
     ω = christoffel(c, _m1, _m2)^2
     ω.parent.monoid(ω.word)                     |>
         repr                                    |>
         x-> replace(x, "a*b"=>"a^1*b")          |>
         x-> replace(x, r"a\^(\d+)\*b"=>s"\1")   |>
         x-> split(x, "*")                      .|>
-        x->parse(Int, x)
+        x-> parse(Int, x)
 
 
  end
