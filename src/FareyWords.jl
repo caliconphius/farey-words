@@ -54,38 +54,6 @@ end
 
 
 
-# function s_seq(L::Vector{Int})
-#     Ω0 = only([L[1]+1])
-#     Ω1 = only([L[1]])
-    
-#     if length(L)==1
-#          return Ω1 
-#     end
-#     L[2] -= 1
-
-#     # Ω1 = flatten((L[1]+1, cycle(L[1], L[2]-1)))
-#     Ω = Ω1
-#     Ω_induct = ((Ω0, Ω1, Ω), (k,l)) -> 
-#         (
-#             Ω1,
-#             (k%2==1) ? 
-#                 flatten((Ω0, cycle(Ω1, l))) : 
-#                 flatten((cycle(Ω1, l), Ω0)),
-#             Ω0
-#         )
-
-#     Ω = foldl(Ω_induct, enumerate(L[2:end]), init=(Ω0, Ω1, Ω))
-
-#     Ω .|> collect
-# end 
-
-
-
-# function palindrome_word(N::Int, f1::GroupGen = f, f2::GroupGen = g)::GroupElem
-#     prod(fill(f1*f2, N÷2)) * (N%2==1 ? f : id)
-# end
-
-
 
 function s_seq(c::ContinuedFraction)
     _M2 = FreeGroup("a", "b")
@@ -93,11 +61,13 @@ function s_seq(c::ContinuedFraction)
     ContinuedFraction(c)
     c.leading==0 || @warn "Farey is currently only implemented for positive rationals <= 1, results for numbers outside this range may be inaccurate"
     ω = christoffel(c, _m1, _m2)^2
-    ω
-    replace(ω.parent.monoid(ω.word) |> repr , r"[\*\^]" =>  s"") |>
-        x-> replace(x, r"ab"=>s"a1b") |>
-        x-> replace(x, r"a|b"=>s"") |>
-        collect .|> x->Int(x) - 0x0030
+    ω.parent.monoid(ω.word)                     |>
+        repr                                    |>
+        x-> replace(x, "a*b"=>"a^1*b")          |>
+        x-> replace(x, r"a\^(\d+)\*b"=>s"\1")   |>
+        x-> split(x, "*")                      .|>
+        x->parse(Int, x)
+
 
  end
 
@@ -116,16 +86,24 @@ function farey_word(c::Number, f, g)
     
  end
 
-function sigma(S::Vector{Int}, m::Int)::Vector{Int}
-    flatmap(S) do x
-        vcat(repeat([m+1], x),[m])
-    end |> collect
+
+function σ(m::Int, F1::FreeGroup, F2::FreeGroup)
+    Hom(F1, F2, (
+        1=>F2(1)^(m+1) * F2(2),
+        2=>F2(1)^(m) * F2(2)
+    ))
 end
 
-function tau(S::Vector{Int}, m::Int)::Vector{Int}
-    flatmap(S) do x
-        vcat(repeat([m], x),[m+1])
-    end |> collect |> reverse
-end
+# function sigma(S::Vector{Int}, m::Int)::Vector{Int}
+#     flatmap(S) do x
+#         vcat(repeat([m+1], x),[m])
+#     end |> collect
+# end
+
+# function tau(S::Vector{Int}, m::Int)::Vector{Int}
+#     flatmap(S) do x
+#         vcat(repeat([m], x),[m+1])
+#     end |> collect |> reverse
+# end
 
 

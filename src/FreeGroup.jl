@@ -86,7 +86,7 @@ function FreeGroup(N::Integer; lett="g")
     FreeGroup(syms)
 end 
 
-function Base.show(io::IO, C::FreeGroup)
+function Base.show(io::IO,  C::FreeGroup)
     if get(io, :compact, false)::Bool
         repr_string =  "Free group: ⟨"*join(repr.(GPC.gens(C)), ",")*"⟩"
     else
@@ -97,14 +97,15 @@ function Base.show(io::IO, C::FreeGroup)
     end
     print(io,repr_string )
 end
-function Base.show(io::IO, c::FreeGroupElement)
+function Base.show(io::IO,  c::FreeGroupElement)
     return print(io, pretty_rep(c))
 end
 
 function pretty_rep(c::FreeGroupElement)
     unpretty = repr(c.parent.monoid(c.word))
-    pretty =    replace(unpretty, "*" =>  ".") |> 
-                x -> replace(x, r"([0-9]+)" =>  s"{\1}") |> 
+    pretty = unpretty                                       |>
+                x -> replace(x, "*" =>  ".")                |> 
+                x -> replace(x, r"\^(\d+)" =>  s"^{\1}")    |> 
                 UnicodeFun.to_latex
     pretty
 end
