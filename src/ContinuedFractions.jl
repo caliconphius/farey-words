@@ -29,6 +29,10 @@ Base.one(c::ContinuedFraction) = ContinuedFraction(1)
 Base.isinteger(c::ContinuedFraction) = isempty(c.L)
     # Q = Rational(Q)
 
+function positive_form(c::ContinuedFraction)
+    Rational(c) |> ContinuedFraction
+end
+
 
 function ContinuedFraction(Q::Rational)
     Q==1//0 && return ContinuedFraction(0, [0])
@@ -46,16 +50,16 @@ end
 
 macro cf0(expr)
 
-    :(ContinuedFraction((0) , $expr))    
+    :(ContinuedFraction((0) , $expr)|>positive_form)    
 end
 
 macro cf(sym::Union{Symbol, Number})
-    :(ContinuedFraction($(esc(sym))))
+    :(ContinuedFraction($(esc(sym)))|>positive_form)
 end
 
 macro cf(expr::Base.Expr)
-    expr.head==:vect && return :(ContinuedFraction($expr[1], $expr[2:end]))
-    :(ContinuedFraction($(esc(expr))))
+    expr.head==:vect && return :(ContinuedFraction($expr[1], $expr[2:end])|>positive_form)
+    :(ContinuedFraction($(esc(expr)))|>positive_form)
 end
 
 # macro cf(sym, expr)

@@ -2,7 +2,7 @@ using Base.Iterators
 
 
 function christoffel(X::Number, a::AbstractElement,b::AbstractElement)
-    Q = ContinuedFraction(X) 
+    Q = ContinuedFraction(X) |> positive_form
 
     # @Match.Match Rational(Q) begin
         
@@ -58,7 +58,9 @@ end
 function s_seq(c::ContinuedFraction)
     _M2 = FreeGroup("a", "b")
     _m1, _m2 = [_M2(x) for x in 1:_M2.ngens]
+    c = positive_form(c)
     0<=Rational(c)<=1 || error("Farey words/S sequences are currently only implemented for positive rationals <= 1, results for numbers outside this range may be inaccurate")
+    Rational(c)==0//1 && return [2]
     ω = christoffel(c, _m1, _m2)^2
     ω.parent.monoid(ω.word)                     |>
         repr                                    |>
@@ -69,19 +71,20 @@ function s_seq(c::ContinuedFraction)
 end
 
 
- function s_seq(c::Number)
+function s_seq(c::Number)
     0<=c<=1 || error("Farey words/S sequences are currently only implemented for positive rationals <= 1, results for numbers outside this range may be inaccurate")
     s_seq(ContinuedFraction(c))
- end
+end
 
 function farey_word(c::Number, f, g)
     s = s_seq(c)
-    accumulate(s, init=(f=>g, nothing)) do x, y
+    out = accumulate(s, init=(f=>g, nothing)) do x, y
         a, b = [x[1]...]
         an = palindrome(a,b, y)
         nextpair = y%2 == 0 ? (inv(a)=>inv(b)) : (inv(b)=>inv(a))
         nextpair, an
     end .|> last |> prod
+    out
     
  end
 
