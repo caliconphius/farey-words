@@ -60,6 +60,7 @@ function s_seq(c::ContinuedFraction)
     _m1, _m2 = [_M2(x) for x in 1:_M2.ngens]
     0<=Rational(c)<=1 || error("Farey words/S sequences are currently only implemented for positive rationals <= 1, results for numbers outside this range may be inaccurate")
     ω = christoffel(c, _m1, _m2)^2
+    Rational(c)==0//1 && return [2]
     ω.parent.monoid(ω.word)                     |>
         repr                                    |>
         x-> replace(x, "a*b"=>"a^1*b")          |>
