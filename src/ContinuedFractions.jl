@@ -1,4 +1,4 @@
-const DEFAULT_INT = Int
+const DEFAULT_INT = BigInt
 
 struct ContinuedFraction{T}<:Number where T<:Integer 
     leading::T
