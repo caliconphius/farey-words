@@ -1,12 +1,12 @@
 
-struct FreeGroup<: GPC.Group 
+struct FreeGroup<: AbstractGroup 
     ngens::UInt
     monoid::GPC.Monoid
     alphabet::KB.Alphabet
     FreeGroup(ngens::Integer, mon::GPC.Monoid) = new(ngens, mon, mon.alphabet)
 end
 
-struct FreeGroupElement <: GPC.GroupElement 
+struct FreeGroupElement <: AbstractGroupElement
     word::KB.Words.Word{UInt}
     elem::GPC.MonoidElement
     parent::FreeGroup
@@ -17,11 +17,13 @@ struct FreeGroupElement <: GPC.GroupElement
     end
 end
 
+
 (F::FreeGroup)(x::KB.Words.AbstractWord) = FreeGroupElement(x, F)
 (F::FreeGroup)(x::FreeGroupElement) = FreeGroupElement(x.word, F)
 (F::FreeGroup)(x::GPC.MonoidElement) = FreeGroupElement(x.word, F)
 (F::FreeGroup)(i::Integer) = FreeGroupElement(F.monoid([i]).word, F)
-(F::FreeGroup)(v::Vector) = FreeGroupElement(F.monoid(v).word, F)
+# (F::FreeGroup)(v::Vector) = FreeGroupElement(F.monoid(v).word, F)
+(F::FreeGroup)(v::T) where T = (map(F, v)) |> x->prod(x, init=one(F))
 
 
 Base.one(C::FreeGroup)::FreeGroupElement = C(one(C.monoid))

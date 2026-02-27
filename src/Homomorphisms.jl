@@ -2,7 +2,7 @@ struct GroupHom end
 struct MonoidHom end
 const AnyHom = Union{GroupHom, MonoidHom}
 
-struct Hom{G1<:GPC.Group, G2<:GPC.Group, TYP<:AnyHom} 
+struct Hom{G1<:AbstractGroup, G2<:AbstractGroup, TYP<:AnyHom} 
     dom::G1
     codom::G2
     image::Dict{UInt, KB.Words.AbstractWord}
@@ -17,7 +17,7 @@ struct Hom{G1<:GPC.Group, G2<:GPC.Group, TYP<:AnyHom}
         
     #     new{G1, G2, MonoidHom}(H1, H2, image)
     # end
-    function Hom(H1::G1, H2::G2, ϕ::NTuple{N, Pair}) where {G1<:GPC.Group, G2<:GPC.Group, N} 
+    function Hom(H1::G1, H2::G2, ϕ::NTuple{N, Pair}) where {G1<:AbstractGroup, G2<:AbstractGroup, N} 
 
         image = ITR.flatmap(ϕ) do pair
             x, y = pair
@@ -34,13 +34,13 @@ struct Hom{G1<:GPC.Group, G2<:GPC.Group, TYP<:AnyHom}
 
 end
 
-function (ϕ::Hom{G1, G2, TYP})(g::GPC.MonoidElement) where {G1<:GPC.Group, G2<:GPC.Group, TYP<:GroupHom} 
+function (ϕ::Hom{G1, G2, TYP})(g::AbstractElement) where {G1<:AbstractGroup, G2<:AbstractGroup, TYP<:GroupHom} 
     # g.parent==ϕ.dom || error("$g is not in the domain of $ϕ = $(ϕ.dom)")
     mapping = ϕ.image
     prod([ϕ.codom(mapping[x]) for x in g.word])
 end
 
-function Base.show(io::IO, ϕ::Hom{G1, G2, TYP}) where  {G1<:GPC.Group, G2<:GPC.Group, TYP<:GroupHom} 
+function Base.show(io::IO, ϕ::Hom{G1, G2, TYP}) where  {G1<:AbstractGroup, G2<:AbstractGroup, TYP<:GroupHom} 
     gen_image = [g=>ϕ(g) for g in GPC.gens(ϕ.dom)]
     repr_string = join(["|\t $(ϕ.dom(x)) -→ $(ϕ.codom(y)) \t|" for (x,y) in gen_image], "\n")
     print(io,"""
@@ -51,7 +51,7 @@ function Base.show(io::IO, ϕ::Hom{G1, G2, TYP}) where  {G1<:GPC.Group, G2<:GPC.
     """)
 end
 
-function Base.show(io::IO, ϕ::Hom{G1, G2, TYP}) where  {G1<:GPC.Group, G2<:GPC.Group, TYP<:MonoidHom} 
+function Base.show(io::IO, ϕ::Hom{G1, G2, TYP}) where  {G1<:AbstractGroup, G2<:AbstractGroup, TYP<:MonoidHom} 
     repr_string = join(["|\t $(ϕ.dom(x)) -→ $(ϕ.codom(y)) \t|" for (x,y) in pairs(ϕ.image)], "\n")
     print(io,"""
    ϕ : $(repr(ϕ.dom, context=IOContext(io, :compact=>true))) ---→ $(repr(ϕ.codom, context=IOContext(io, :compact=>true)))
