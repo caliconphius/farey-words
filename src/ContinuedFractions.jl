@@ -3,10 +3,10 @@ const DEFAULT_INT = Int
 struct ContinuedFraction{T}<:Number where T<:Integer 
     leading::T
     L::Vector{T}
-    length::UInt
+    length::Int
     function ContinuedFraction(first::S, L::Vector{T}) where {S<:Integer, T<:Integer}
         isempty(L) && return new{DEFAULT_INT}(DEFAULT_INT(first), DEFAULT_INT[], 2)
-        L[1] == 0 && return new{DEFAULT_INT}(DEFAULT_INT(0), DEFAULT_INT[0], 2)
+        L[1] == 0 && return new{DEFAULT_INT}(DEFAULT_INT(first), DEFAULT_INT[0], 2)
         last(L) == 1 && begin
             if length(L) == 1
                 first+=1
@@ -35,7 +35,8 @@ end
 
 
 function ContinuedFraction(Q::Rational)
-    Q==1//0 && return ContinuedFraction(0, [0])
+    Q==1//0 && return ContinuedFraction(1, [0])
+    Q==-1//0 && return ContinuedFraction(-1, [0])
     leading = DEFAULT_INT(Q - Q%1)
     Q = Q%1
     L = DEFAULT_INT[]
@@ -66,8 +67,6 @@ end
 #     :(ContinuedFraction(($sym),$expr))
 # end
 
-# ContinuedFraction(Q::Rational{T}) where T<:Integer = ContinuedFraction{T}(Q)
-
 
 function ContinuedFraction(Q::T) where T<:Real 
     typeof(Q)<:AbstractFloat && @warn "Converting "*(ITR.take("$(Q)",8)|>join)*"... of type $(typeof(Q)) to a rational, results may suffer from floating point errors. Write p//q for exact division"
@@ -76,9 +75,10 @@ end
 
 Base.eltype(::Type{ContinuedFraction{S}}) where S<:Integer  = S
 Base.length(c::ContinuedFraction) = c.length
-function Base.iterate(c::ContinuedFraction, state::Int=1)
-    state==1 && return (c.leading, 2)
-    return state <= c.length ? (c.L[state-1],state+1) : nothing
+Base.iterate(c::ContinuedFraction) = c.leading, 1
+
+function Base.iterate(c::ContinuedFraction, state::Int)
+    return state < c.length ? (c.L[state],state+1) : nothing
 end
 
 Base.IteratorSize(::Type{ContinuedFraction{S}}) where S<:Integer= Base.HasLength()
@@ -91,7 +91,7 @@ Base.convert(::Type{T}, x::ContinuedFraction{S}) where {T<:Real, S<:Integer} = T
 
 function _rational(x::ContinuedFraction)
     (isempty(x.L)) && return x.leading//1
-    (x.L[1]==0) && return 1//0
+    (x.L[1]==0) && return x.leading//0
     reduce(x|>collect|>reverse) do q,l
         l + 1//q
     end 
@@ -109,33 +109,35 @@ Base.promote_rule(::Type{T}, ::Type{ContinuedFraction{S}}) where {T<:Integer, S<
 Base.promote_rule(::Type{ContinuedFraction{T}}, ::Type{S}) where {T<:Integer, S<:AbstractFloat} = Base.promote_type(Rational{T},S)
 
 
-function Base.:(*)(c::ContinuedFraction, d::ContinuedFraction) 
-    r = Rational(c); s = Rational(d)    
-    return ContinuedFraction(r * s)
+binary_ops = (:+, :-, :*, :/, :\)
+binary_ops_nc = (:isequal, :isless, :^)
+unary_ops = (:-, :abs, :inv)
+unary_ops_nc =  (:numerator, :denominator)
+let C=ContinuedFraction, Q=Rational
+
+function Base.:^(c::C, n::Real)
+    Q(c)^Q(n)
 end
 
-function Base.:(/)(c::ContinuedFraction, d::ContinuedFraction)
-    r = Rational(c); s = Rational(d)    
-    return ContinuedFraction(r/s)
+for op in binary_ops
+    @eval Base.$op(c::$C, d::$C) = $C(Base.$op(c|>$Q, d|>$Q))::$C
 end
 
-function Base.:(^)(c::ContinuedFraction, n::Integer)
-    r = Rational(c)
-    return ContinuedFraction(r^n)
+for op in binary_ops_nc
+    @eval Base.$op(c::$C, d::T) where T<:Number = Base.$op(c|>$Q, d|>$Q)
+    @eval Base.$op(d::T,c::$C) where T<:Number = Base.$op(d|>$Q, c|>$Q)
+
 end
 
-function Base.:(+)(c::ContinuedFraction, d::ContinuedFraction)
-    r = Rational(c); s = Rational(d)    
-    return ContinuedFraction(r+s)
+for op in unary_ops
+    @eval Base.$op(c::$C) = $C(Base.$op(c|>$Q))::$C
 end
 
-function Base.:(-)(c::ContinuedFraction, d::ContinuedFraction)
-    r = Rational(c); s = Rational(d)
-    return ContinuedFraction(r-s)
+for op in unary_ops_nc
+    @eval Base.$op(c::$C) = (Base.$op(c|>$Q))
 end
 
-function Base.inv(c::ContinuedFraction)
-    return ContinuedFraction(1/c)
+
 end
 
 

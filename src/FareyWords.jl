@@ -1,21 +1,20 @@
 using Base.Iterators
 
 
-function christoffel(X::Number, a::AbstractElement,b::AbstractElement)
+function christoffel(X::Number, a::AbstractElement, b::AbstractElement)
     Q = ContinuedFraction(X) |> positive_form
 
-    # @Match.Match Rational(Q) begin
-        
-    # end
-
-    if Q.leading!=0 && !(Rational(Q)===1//1)
+    b = Q < 0 ? inv(b) : b
+    if abs(Q) > 1
         a, b = (b, a)
-        Q::ContinuedFraction = 1/Q 
+        Q = one(Q)/Q
     end
+
+    Q==0//1 && return a
+    
     Ω0 = a
     Ω∞ = b
     Ω1 = Ω0*Ω∞
-
     for (k,l) in enumerate(Q.L)
         Ω1 =  k%2==1 ? Ω0^l*Ω∞ : Ω∞*Ω0^l
         Ω∞ = Ω0
@@ -24,19 +23,17 @@ function christoffel(X::Number, a::AbstractElement,b::AbstractElement)
 
 
     triple = (Ω0=Ω0, Ω∞=Ω∞, Ω=Ω1)
-    Rational(X)==0//1 ? triple.Ω0 :
-    Rational(X)==1//0 ? triple.Ω∞ :
     triple.Ω
-         
+
 
 end
 
-function christoffel(p::Int, q::Int, a::GPC.GroupElement,b::GPC.GroupElement)
-    x0, x1 = p<0 ? (b, inv(a)) : (a,b)
-    christoffel(p//q, x0, x1)
-end
+# function christoffel(p::Int, q::Int, a::GPC.GroupElement,b::GPC.GroupElement)
+#     x0, x1 = p/q<0 ? (b, inv(a)) : (a,b)
+#     christoffel(p//q, x0, x1)
+# end
 
-christoffel(Q::Number, G::GPC.Group) = christoffel(Q, G.(1:2)...)
+christoffel(Q::Number, G::AbstractMonoid) = christoffel(Q, G.(1:2)...)
 
 function palindrome(f, g, n)
     (f*g)^(n÷2) * f^(n%2)
