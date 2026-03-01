@@ -16,7 +16,12 @@ Base.inv(f::T) where T <: GPC.MonoidElement =  f.parent(KB.inv(f.word, f.parent.
 import Base.Iterators as ITR
 
 export ITR
+<<<<<<< Updated upstream
 export KB, MON, GPC, inv
+=======
+export KB, MON, GPC
+export inv, (\), (<<), (|>), (∘)
+>>>>>>> Stashed changes
 export FreeGroup
 export s_seq
 export christoffel, Hom, palindrome, pretty_rep

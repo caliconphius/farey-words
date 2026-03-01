@@ -1,6 +1,7 @@
 using Base.Iterators
 
 
+<<<<<<< Updated upstream
 function christoffel(X::Number, a::AbstractElement,b::AbstractElement)
     Q = ContinuedFraction(X) |> positive_form
 
@@ -12,6 +13,21 @@ function christoffel(X::Number, a::AbstractElement,b::AbstractElement)
         a, b = (b, a)
         Q::ContinuedFraction = 1/Q 
     end
+=======
+function christoffel(X::Number, a::AbstractElement, b::AbstractElement)
+
+    if abs(X) > 1
+        a, b = (b, a)
+        X = one(X)/X
+    end
+
+    b = X < 0 ? inv(b) : b
+
+    X==0 && return a
+    
+    Q = ContinuedFraction(X) |> positive_form
+    
+>>>>>>> Stashed changes
     Ω0 = a
     Ω∞ = b
     Ω1 = Ω0*Ω∞
@@ -23,6 +39,7 @@ function christoffel(X::Number, a::AbstractElement,b::AbstractElement)
     end
 
 
+<<<<<<< Updated upstream
     triple = (Ω0=Ω0, Ω∞=Ω∞, Ω=Ω1)
     Rational(X)==0//1 ? triple.Ω0 :
     Rational(X)==1//0 ? triple.Ω∞ :
@@ -37,6 +54,20 @@ function christoffel(p::Int, q::Int, a::GPC.GroupElement,b::GPC.GroupElement)
 end
 
 christoffel(Q::Number, G::GPC.Group) = christoffel(Q, G.(1:2)...)
+=======
+    Ω1
+    # triple = (Ω0=Ω0, Ω∞=Ω∞, Ω=Ω1)
+    # triple.Ω
+end
+
+christoffel(Q::Number, G::AbstractMonoid) = christoffel(Q, G.(1:2)...)
+>>>>>>> Stashed changes
+
+function christoffel(p::Int, q::Int, rest...)
+    Ω = christoffel(p//q, rest...)
+    return q < 0 ? inv(Ω) : Ω
+end
+
 
 function palindrome(f, g, n)
     (f*g)^(n÷2) * f^(n%2)

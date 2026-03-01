@@ -100,7 +100,16 @@ function Base.show(io::IO,  C::FreeGroup)
     print(io,repr_string )
 end
 function Base.show(io::IO,  c::FreeGroupElement)
-    return print(io, pretty_rep(c))
+    if get(io, :compact, false)::Bool
+        repr_string =  pretty_rep(c)
+        elems = split(repr_string, ".")
+        if length(elems)>8
+            repr_string = join(elems[1:4], ".")*"..."*join(elems[end-4:end], ".")
+        end
+    else
+        repr_string =  pretty_rep(c)
+    end
+    return print(io, repr_string)
 end
 
 function pretty_rep(c::FreeGroupElement)
