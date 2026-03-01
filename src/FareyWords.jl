@@ -3,27 +3,27 @@ using Base.Iterators
 
 function christoffel(X::Number, a::AbstractElement, b::AbstractElement)
 
-    if abs(X) > 1
-        a, b = (b, a)
-        X = one(X)/X
-    end
-
-    b = X < 0 ? inv(b) : b
+    x,y = abs(X) > 1 ? (b,a) : (a,b)
 
     X==0 && return a
     
     Q = ContinuedFraction(X) |> positive_form
     
-    Ω0 = a
-    Ω∞ = b
+    Ω0 = x
+    Ω∞ = y
     Ω1 = Ω0*Ω∞
     for (k,l) in enumerate(Q.L)
-        Ω1 =  k%2==1 ? Ω0^l*Ω∞ : Ω∞*Ω0^l
+        @show (k,l, Ω0, Ω∞, Ω1)
+        Ω1 =  k%2==1 ? Ω0^abs(l)*Ω∞ : Ω∞*Ω0^abs(l)
         Ω∞ = Ω0
         Ω0 = Ω1
     end
 
-
+    if X < 0
+        F = x.parent
+        T = Hom(F, F, (x=>x, y=>inv(y)))
+        return T(Ω1)
+    end
     Ω1
     # triple = (Ω0=Ω0, Ω∞=Ω∞, Ω=Ω1)
     # triple.Ω
