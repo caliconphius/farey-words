@@ -1,19 +1,6 @@
 using Base.Iterators
 
 
-<<<<<<< Updated upstream
-function christoffel(X::Number, a::AbstractElement,b::AbstractElement)
-    Q = ContinuedFraction(X) |> positive_form
-
-    # @Match.Match Rational(Q) begin
-        
-    # end
-
-    if Q.leading!=0 && !(Rational(Q)===1//1)
-        a, b = (b, a)
-        Q::ContinuedFraction = 1/Q 
-    end
-=======
 function christoffel(X::Number, a::AbstractElement, b::AbstractElement)
 
     if abs(X) > 1
@@ -27,7 +14,6 @@ function christoffel(X::Number, a::AbstractElement, b::AbstractElement)
     
     Q = ContinuedFraction(X) |> positive_form
     
->>>>>>> Stashed changes
     Ω0 = a
     Ω∞ = b
     Ω1 = Ω0*Ω∞
@@ -39,29 +25,12 @@ function christoffel(X::Number, a::AbstractElement, b::AbstractElement)
     end
 
 
-<<<<<<< Updated upstream
-    triple = (Ω0=Ω0, Ω∞=Ω∞, Ω=Ω1)
-    Rational(X)==0//1 ? triple.Ω0 :
-    Rational(X)==1//0 ? triple.Ω∞ :
-    triple.Ω
-         
-
-end
-
-function christoffel(p::Int, q::Int, a::GPC.GroupElement,b::GPC.GroupElement)
-    x0, x1 = p<0 ? (b, inv(a)) : (a,b)
-    christoffel(p//q, x0, x1)
-end
-
-christoffel(Q::Number, G::GPC.Group) = christoffel(Q, G.(1:2)...)
-=======
     Ω1
     # triple = (Ω0=Ω0, Ω∞=Ω∞, Ω=Ω1)
     # triple.Ω
 end
 
 christoffel(Q::Number, G::AbstractMonoid) = christoffel(Q, G.(1:2)...)
->>>>>>> Stashed changes
 
 function christoffel(p::Int, q::Int, rest...)
     Ω = christoffel(p//q, rest...)
