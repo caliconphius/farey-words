@@ -17,7 +17,6 @@ function christoffel(X::Number, a::AbstractElement, b::AbstractElement)
     Ω0 = a
     Ω∞ = b
     Ω1 = Ω0*Ω∞
-
     for (k,l) in enumerate(Q.L)
         Ω1 =  k%2==1 ? Ω0^l*Ω∞ : Ω∞*Ω0^l
         Ω∞ = Ω0

@@ -99,6 +99,7 @@ function Base.show(io::IO,  C::FreeGroup)
     end
     print(io,repr_string )
 end
+
 function Base.show(io::IO,  c::FreeGroupElement)
     if get(io, :compact, false)::Bool
         repr_string =  pretty_rep(c)
