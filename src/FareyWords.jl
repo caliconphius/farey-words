@@ -2,18 +2,22 @@ using Base.Iterators
 
 
 function christoffel(X::Number, a::AbstractElement, b::AbstractElement)
-
-    x,y = abs(X) > 1 ? (b,a) : (a,b)
-
     X==0 && return a
+
+    if abs(X) > 1
+        x,y = (b,a)
     
-    Q = ContinuedFraction(X) |> positive_form
+        Q = ContinuedFraction(1/X) |> positive_form
+    else
+        x,y = (a,b)
+        Q = ContinuedFraction(X) |> positive_form
+    end
+    
     
     Ω0 = x
     Ω∞ = y
     Ω1 = Ω0*Ω∞
     for (k,l) in enumerate(Q.L)
-        @show (k,l, Ω0, Ω∞, Ω1)
         Ω1 =  k%2==1 ? Ω0^abs(l)*Ω∞ : Ω∞*Ω0^abs(l)
         Ω∞ = Ω0
         Ω0 = Ω1
