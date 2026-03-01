@@ -11,6 +11,7 @@ import Match, TOML, UnicodeFun
 
 
 Base.inv(f::T) where T <: GPC.MonoidElement =  f.parent(KB.inv(f.word, f.parent.alphabet))
+Base.:\(f::T, g::T) where T<: AbstractElement = inv(f) * g
 
 
 import Base.Iterators as ITR
