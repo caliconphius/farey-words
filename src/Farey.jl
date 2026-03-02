@@ -3,6 +3,7 @@ const DOT = "·"
 import KnuthBendix as KB
 import KnuthBendix.FPMonoids as MON
 import GroupsCore as GPC
+import Chevie as CHV
 
 include("GroupInterface.jl")
 
@@ -17,7 +18,7 @@ Base.:\(f::T, g::T) where T<: AbstractElement = inv(f) * g
 import Base.Iterators as ITR
 
 export ITR
-export KB, MON, GPC
+export KB, MON, GPC, CHV
 export inv, (\), (<<), (|>), (∘)
 export FreeGroup
 export s_seq
@@ -30,6 +31,7 @@ include("Words.jl")
 include("Homomorphisms.jl")
 include("ContinuedFractions.jl")
 include("FareyWords.jl")
+include("BraidGroups.jl")
 
 
 end
