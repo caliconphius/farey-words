@@ -50,7 +50,7 @@ function Base.show(io::IO, ϕ::Hom{G1, G2}) where  {G1<:AbstractGroup, G2<:Abstr
     
     repr_string = join(["|\t$(ϕ.dom(x)) -→  $(repr(ϕ.codom(y), context=IOContext(io, :compact=>true)))" for (x,y) in gen_image], "\n")
     print(io,"""
-   ϕ : $(repr(ϕ.dom, context=IOContext(io, :compact=>true))) ---→ $(repr(ϕ.codom, context=IOContext(io, :compact=>true)))
+   :$(repr(ϕ.dom, context=IOContext(io, :compact=>true))) ---→ $(repr(ϕ.codom, context=IOContext(io, :compact=>true)))
    """*"""
    $repr_string
    (Group Homomorphism)

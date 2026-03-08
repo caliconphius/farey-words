@@ -7,3 +7,6 @@ function Base.:(<<)(x::AbstractElement, n::Integer)
     F(flatten([x.word[n_mod+1:end],ITR.take(x.word, n_mod)])) 
 end
 
+# function min_conjugate(x::FreeGroupElement)
+    
+# end
