@@ -36,6 +36,11 @@ GPC.isfinite(C::FreeGroup) = false
 GPC.gens(C::FreeGroup) = [C(i) for i in 1:C.ngens]
 
 GPC.parent(c::FreeGroupElement) = c.parent
+
+function Base.getindex(g::FreeGroupElement, I::Union{UnitRange, Integer})
+    return g.parent(g.word[I])
+end
+
 function Base.:(==)(g::FreeGroupElement, h::FreeGroupElement)
     return parent(g) === parent(h) && g.word == h.word
 end

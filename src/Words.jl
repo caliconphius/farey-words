@@ -7,6 +7,14 @@ function Base.:(<<)(x::AbstractElement, n::Integer)
     F(flatten([x.word[n_mod+1:end],ITR.take(x.word, n_mod)])) 
 end
 
-# function min_conjugate(x::FreeGroupElement)
+function conj_prefix(x::FreeGroupElement)
+    xi = inv(x)
+    Gr = x.parent
     
-# end
+    prefix = zip(x.word, xi.word) |>
+        itr->ITR.takewhile((x)->x[1]==x[2], itr) |> 
+        l->mapreduce(x->Gr(x[1]), *, l, init=one(Gr))
+
+    prefix, x^prefix
+
+end

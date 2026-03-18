@@ -23,7 +23,7 @@ export FreeGroup
 export s_seq
 export christoffel, Hom, palindrome, pretty_rep
 export ContinuedFraction, shrink_cf, farey_word
-export @cf0, @cf, ⊕, ⊖,farey_neighbours, positive_form
+export @cf0, @cf, ⊕, ⊖,farey_neighbours, positive_form, conj_prefix
 
 include("FreeGroup.jl")
 include("Words.jl")

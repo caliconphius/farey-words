@@ -42,7 +42,21 @@ function Base.:|>(ϕ1::Hom{G1,G2}, ϕ2::Hom{G2, G3})::Hom{G1,G3} where {G1<:Abst
     ϕ2∘ϕ1
 end
 
+function Base.:(*)(ϕ1::Hom{G2,G3}, ϕ2::Hom{G1, G2})::Hom{G1,G3} where {G1<:AbstractGroup, G2<:AbstractGroup, G3<:AbstractGroup} 
+    ϕ1∘ϕ2
+end
 
+
+
+function Base.:(^)(m::Hom{G1,G1}, n::Integer)::Hom{G1,G1} where {G1<:AbstractGroup, }
+    n < 0 && error("inverses not implemented")
+    return Base.power_by_squaring(m, n)
+end
+
+
+function Base.:(^)(m::Hom{G1,G2}, g::AbstractGroupElement)::Hom{G1,G2} where {G1<:AbstractGroup,G2<:AbstractGroup }
+    return Hom(m.dom, m.codom, [x=>(m.codom(y)^g).word for (x,y) in m.image]|>Tuple)
+end
 
 function Base.show(io::IO, ϕ::Hom{G1, G2}) where  {G1<:AbstractGroup, G2<:AbstractGroup} 
     gen_image = [g=>ϕ(g) for g in GPC.gens(ϕ.dom)]
