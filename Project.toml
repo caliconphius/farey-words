@@ -6,7 +6,6 @@ authors = ["Thomas Csizmadia <shadowfax.tdc86@gmail.com> and contributors"]
 [deps]
 Automa = "67c07d97-cdcb-5c2c-af73-a7f9c32a568b"
 Chevie = "367f69f0-ca63-11e8-2372-438b29340c1b"
-DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"
 GroupsCore = "d5909c97-4eac-4ecc-a3dc-fdd0858a4120"
 IJulia = "7073ff75-c697-5162-941a-fcdaad2a7d2a"
 KnuthBendix = "c2604015-7b3d-4a30-8a26-9074551ec60a"
@@ -19,7 +18,6 @@ UnicodeFun = "1cfade01-22cf-5700-b092-accc4b62d6e1"
 [compat]
 Automa = "1.1.0"
 Chevie = "0.1.12"
-DataInterpolations = "8.9.0"
 GroupsCore = "0.5.2"
 IJulia = "1.34.4"
 KnuthBendix = "0.5.0"

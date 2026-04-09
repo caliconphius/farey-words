@@ -23,13 +23,14 @@ struct Hom{G1<:AbstractGroup, G2<:AbstractGroup}
 
 end
 
+
 function (ϕ::Hom{G1, G2})(g::AbstractElement) where {G1<:AbstractGroup, G2<:AbstractGroup} 
     # g.parent==ϕ.dom || error("$g is not in the domain of $ϕ = $(ϕ.dom)")
     mapping = ϕ.image
-    prod([ϕ.codom(mapping[x]) for x in g.word])
+    prod([ϕ.codom(mapping[x]) for x in g.word], init=one(g.parent))
 end
 
-function Base.:∘(ϕ1::Hom{G2,G3}, ϕ2::Hom{G1, G2})::Hom{G1,G3} where {G1<:AbstractGroup, G2<:AbstractGroup, G3<:AbstractGroup} 
+function Base.:|>(ϕ1::Hom{G2,G3}, ϕ2::Hom{G1, G2})::Hom{G1,G3} where {G1<:AbstractGroup, G2<:AbstractGroup, G3<:AbstractGroup} 
 
     #TODO! Add check that codom ϕ1 = dom ϕ2
     Hom(ϕ2.dom, ϕ1.codom, Tuple(
@@ -38,8 +39,8 @@ function Base.:∘(ϕ1::Hom{G2,G3}, ϕ2::Hom{G1, G2})::Hom{G1,G3} where {G1<:Abs
 
 end
 
-function Base.:|>(ϕ1::Hom{G1,G2}, ϕ2::Hom{G2, G3})::Hom{G1,G3} where {G1<:AbstractGroup, G2<:AbstractGroup, G3<:AbstractGroup}  
-    ϕ2∘ϕ1
+function Base.:∘(ϕ1::Hom{G1,G2}, ϕ2::Hom{G2, G3})::Hom{G1,G3} where {G1<:AbstractGroup, G2<:AbstractGroup, G3<:AbstractGroup}  
+    ϕ2|>ϕ1
 end
 
 function Base.:(*)(ϕ1::Hom{G2,G3}, ϕ2::Hom{G1, G2})::Hom{G1,G3} where {G1<:AbstractGroup, G2<:AbstractGroup, G3<:AbstractGroup} 
@@ -49,6 +50,8 @@ end
 
 
 function Base.:(^)(m::Hom{G1,G1}, n::Integer)::Hom{G1,G1} where {G1<:AbstractGroup, }
+    n == 0 && return Hom(m.dom, m.codom, [g=>g for g in GPC.gens(m.dom)]|>Tuple)
+    n==1 && return m
     n < 0 && error("inverses not implemented")
     return Base.power_by_squaring(m, n)
 end

@@ -41,6 +41,8 @@ function Base.getindex(g::FreeGroupElement, I::Union{UnitRange, Integer})
     return g.parent(g.word[I])
 end
 
+Base.lastindex(c::FreeGroupElement) = length(c)
+
 function Base.:(==)(g::FreeGroupElement, h::FreeGroupElement)
     return parent(g) === parent(h) && g.word == h.word
 end

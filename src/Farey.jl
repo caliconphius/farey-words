@@ -12,13 +12,14 @@ import Match, TOML, UnicodeFun
 
 Base.inv(f::T) where T <: GPC.MonoidElement =  f.parent(KB.inv(f.word, f.parent.alphabet))
 Base.:\(f::T, g::T) where T<: AbstractElement = inv(f) * g
-
+Base.:-(f::T) where T<: AbstractElement = inv(f)
+↑(f::T, g::T) where T<: AbstractElement = f ^ inv(g)
 
 import Base.Iterators as ITR
 
 export ITR
 export KB, MON, GPC
-export inv, (\), (<<), (|>), (∘)
+export inv, (\), (<<), (|>), (∘), (↑), (-)
 export FreeGroup
 export s_seq
 export christoffel, Hom, palindrome, pretty_rep

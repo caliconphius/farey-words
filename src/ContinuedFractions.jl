@@ -5,7 +5,7 @@ struct ContinuedFraction{T}<:Number where T<:Integer
     L::Vector{T}
     length::Int
     function ContinuedFraction(first::S, L::Vector{T}) where {S<:Integer, T<:Integer}
-        isempty(L) && return new{DEFAULT_INT}(DEFAULT_INT(first), DEFAULT_INT[], 2)
+        isempty(L) && return new{DEFAULT_INT}(DEFAULT_INT(first), DEFAULT_INT[], 1)
         L[1] == 0 && return new{DEFAULT_INT}(DEFAULT_INT(first), DEFAULT_INT[0], 2)
         last(L) == 1 && begin
             if length(L) == 1
@@ -115,17 +115,18 @@ unary_ops = (:-, :abs, :inv)
 unary_ops_nc =  (:numerator, :denominator)
 let C=ContinuedFraction, Q=Rational
 
-function Base.:^(c::C, n::Real)
-    Q(c)^Q(n)
-end
+# function Base.:^(c::C, n::Real)
+#     Q(c)^Q(n)
+# end
 
 for op in binary_ops
     @eval Base.$op(c::$C, d::$C) = $C(Base.$op(c|>$Q, d|>$Q))::$C
 end
 
 for op in binary_ops_nc
-    @eval Base.$op(c::$C, d::T) where T<:Number = Base.$op(c|>$Q, d|>$Q)
-    @eval Base.$op(d::T,c::$C) where T<:Number = Base.$op(d|>$Q, c|>$Q)
+    @eval Base.$op(c::$C, d::T) where T<:Real = Base.$op(c|>$Q, d|>$Q)
+    @eval Base.$op(d::T,c::$C) where T<:Real = Base.$op(d|>$Q, c|>$Q)
+    @eval Base.$op(d::$C,c::$C) = Base.$op(d|>$Q, c|>$Q)
 
 end
 
@@ -146,9 +147,9 @@ function ⊕(p::Number, q::Number)
         [x.num, x.den]
     end |> collect
     
-
-    abs(r * u - s * t) == 1 || error("$p and $q are not farey neighbours")
-
+    Δ = r * u - s * t
+    abs(Δ) == 1 || error("$p and $q are not farey neighbours")
+    Δ < 0 && println("switching inputs") 
     return (r+t)//(s+u) |> ContinuedFraction
 end
 
@@ -157,7 +158,9 @@ function ⊖(p::Number, q::Number)
         [x.num, x.den]
     end |> collect
     
-    abs(r * u - s * t) == 1 || error("$p and $q are not farey neighbours")
+    Δ = r * u - s * t
+    abs(Δ) == 1 || error("$p and $q are not farey neighbours")
+    Δ < 0 && println("switching inputs") 
 
     return (r-t)//(s-u) |> ContinuedFraction
 end
