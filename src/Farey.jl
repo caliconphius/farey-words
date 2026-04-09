@@ -7,7 +7,18 @@ import GroupsCore as GPC
 include("GroupInterface.jl")
 
 using .Interfaces:AbstractGroup, AbstractMonoid, AbstractElement, AbstractGroupElement, AbstractMonoidElement
+import Base.Iterators as ITR
 import Match, TOML, UnicodeFun
+
+export ITR
+
+include( "Monoid.jl")
+
+using .Monoids:gcp, eachgen
+import .Monoids
+export gcp
+
+
 
 
 Base.inv(f::T) where T <: GPC.MonoidElement =  f.parent(KB.inv(f.word, f.parent.alphabet))
@@ -15,9 +26,7 @@ Base.:\(f::T, g::T) where T<: AbstractElement = inv(f) * g
 Base.:-(f::T) where T<: AbstractElement = inv(f)
 ↑(f::T, g::T) where T<: AbstractElement = f ^ inv(g)
 
-import Base.Iterators as ITR
 
-export ITR
 export KB, MON, GPC
 export inv, (\), (<<), (|>), (∘), (↑), (-)
 export FreeGroup
@@ -32,5 +41,9 @@ include("Homomorphisms.jl")
 include("ContinuedFractions.jl")
 include("FareyWords.jl")
 
+
+include("SuffixTrees.jl")
+import .SuffixTrees as SFX
+export SFX
 
 end
