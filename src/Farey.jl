@@ -12,11 +12,11 @@ import Match, TOML, UnicodeFun
 
 export ITR
 
-include( "Monoid.jl")
+include( "Monoids.jl")
 
-using .Monoids:gcp, eachgen
+using .Monoids:gcp, eachgen, AbstractMonoidGen,AbstractMonoidWord
 import .Monoids
-export gcp
+export gcp, AbstractMonoidGen,AbstractMonoidWord
 
 
 
@@ -27,7 +27,7 @@ Base.:-(f::T) where T<: AbstractElement = inv(f)
 ↑(f::T, g::T) where T<: AbstractElement = f ^ inv(g)
 
 
-export KB, MON, GPC
+export KB, MON, GPC, Monoids
 export inv, (\), (<<), (|>), (∘), (↑), (-)
 export FreeGroup
 export s_seq

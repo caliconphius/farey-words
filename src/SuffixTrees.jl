@@ -1,6 +1,8 @@
 module SuffixTrees
     using FixedSizeArrays
     using ..Monoids
+    using ..Interfaces:AbstractElement,AbstractMonoidElement
+    using Farey:FreeGroupElement
     include("alphabet.jl")
 
 
@@ -34,9 +36,6 @@ mutable struct SuffixNode <: AbstractNode
 
     end
 end
-
-
-
 
 
 #
@@ -152,21 +151,21 @@ function edgelength(tr::AbstractTree, nd::Int)
     edgelength(tr, tr[nd])
 end
 
-text(tr::SuffixTree{S}, pos::Int) where S<:Farey.AbstractElement = pos > tr.lw ? FINAL_CHAR : genId(word(tr.word)[pos])::Int
+text(tr::SuffixTree{S}, pos::Int) where S<:AbstractElement = pos > tr.lw ? FINAL_CHAR : genId(word(tr.word)[pos])::Int
 
-text(tr::SuffixTree{S}, pos::Int) where S<:Farey.FreeGroupElement = pos > tr.lw ? FINAL_CHAR : Int(word(tr.word)[pos])::Int
+text(tr::SuffixTree{S}, pos::Int) where S<:FreeGroupElement = pos > tr.lw ? FINAL_CHAR : Int(word(tr.word)[pos])::Int
 
 text(tr::SuffixTree{S}, pos::Int) where S<:AbstractString = pos > tr.lw ? FINAL_CHAR : Int(tr.word[pos])::Int
 
-function text(tr::SuffixTree{S})::Vector{Int} where S<:Farey.FreeGroupElement
+function text(tr::SuffixTree{S})::Vector{Int} where S<:FreeGroupElement
     Int[Int(x) for x in tr.word.word]
 end
 
-function text(tr::SuffixTree{S})::Vector{Int} where S<:Farey.AbstractMonoidElement
+function text(tr::SuffixTree{S})::Vector{Int} where S<:AbstractMonoidElement
     Int[genId(x) for x in Monoids.eachgen(tr.word)]
 end
 
-function genId(x::Farey.AbstractMonoidElement)::Int
+function genId(x::AbstractMonoidElement)::Int
     x.id < 0xff || error("$(x.id) ($x) is an invalid index for building suffix trees (ALPHABET_SIZE = $ALPHABET_SIZE)")
     x.exp == 1 && return Int(x.id)
     x.exp == -1 && return 0xff + Int(x.id) -1
@@ -242,11 +241,11 @@ end
     #     return node
     # end
     
-function πw(tr, txt::Vector{Int})::Int
+# function πw(tr, txt::Vector{Int})::Int
 
-    node, edge = walktree(tr, txt)
-    node == 0 ? -1 : nodepath(tr, node)
-end
+#     node, edge = walktree(tr, txt)
+#     node == 0 ? -1 : nodepath(tr, node)
+# end
 
 function wordtext(syms::Vector{Int}, init::String)::String
     prod(Char.(syms + 1), init=init)
@@ -574,11 +573,6 @@ function extend_suffix!(
 end
 
 
-
-function wordtext(syms::Vector{Int}, Gr::Farey.AbstractMonoid)::Farey.AbstractElement
-    Gr(syms)
-end
-
 function _build_tree!(tr::SuffixTree{S}) where S
     rem::Int = 0
     nde::Int = 0
@@ -615,6 +609,7 @@ function SuffixTree(w::S)::SuffixTree{S} where S
     tr
 
 end
+
 
 function Base.show(io::IO, tr::SuffixTree)
     #   Gr = tr.word.parent
@@ -708,7 +703,7 @@ function edgeword(tr::SuffixTree{S}, nd::AbstractNode) where S
 end
 
 
-function subword(tr::SuffixTree{S}, node::AbstractNode) where S<:Farey.AbstractElement
+function subword(tr::SuffixTree{S}, node::AbstractNode) where S<:AbstractElement
     word = edgeword(tr, node)
 
     while node.parent != 0
@@ -719,7 +714,7 @@ function subword(tr::SuffixTree{S}, node::AbstractNode) where S<:Farey.AbstractE
 end
 
 
-function reprtree(tr::SuffixTree{S}) where S<:Farey.AbstractElement
+function reprtree(tr::SuffixTree{S}) where S<:AbstractElement
     Gr = tr.word.parent
     root = tr[0]
     depth = 1
@@ -1071,7 +1066,7 @@ end
 
     # # end
 
-    # #   function text(w::Farey.AbstractElement)::Vector{Int}
+    # #   function text(w::AbstractElement)::Vector{Int}
     # #       [Int(x) for x in w.word]
     # #   end
 end
