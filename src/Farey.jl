@@ -6,7 +6,7 @@ import GroupsCore as GPC
 
 include("GroupInterface.jl")
 
-using .Interfaces:AbstractGroup, AbstractMonoid, AbstractElement, AbstractGroupElement, AbstractMonoidElement
+using .Interfaces:AbstractGroup, AbstractMonoid, AbstractElement, AbstractGroupElement, AbstractMonoidElement, AbstractHom
 import Base.Iterators as ITR
 import Match, TOML, UnicodeFun
 
@@ -22,7 +22,7 @@ export gcp, AbstractMonoidGen,AbstractMonoidWord
 
 
 Base.inv(f::T) where T <: GPC.MonoidElement =  f.parent(KB.inv(f.word, f.parent.alphabet))
-Base.:\(f::T, g::T) where T<: AbstractElement = inv(f) * g
+Base.:\(f::T, g::T) where T<: Union{AbstractGroupElement, AbstractElement} = inv(f) * g
 Base.:-(f::T) where T<: AbstractElement = inv(f)
 ↑(f::T, g::T) where T<: AbstractElement = f ^ inv(g)
 

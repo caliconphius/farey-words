@@ -6,7 +6,7 @@ parent(x::FreeGroupElement) = x.parent
 word(x::AbstractMonoidElement) = x
 parent(x::AbstractMonoidElement) = Monoids.eachgen(x)
 
-Base.length(x::AbstractElement) = length(word(x))
+# Base.length(x::AbstractElement) = length(word(x))
 
 function Base.:(<<)(x::AbstractElement, n::Integer) 
     n_mod = n%length(x)

@@ -40,30 +40,31 @@ const SEP = ""
     end
 
     Base.one(g::MonoidGen{T}) where T = MonoidGen{T}(0*g.id)
+    Base.length(g::MonoidGen{T}) where T = abs(g.exp)
     Base.:-(g::MonoidGen{T}) where T = MonoidGen{T}(g.id, p=-g.exp)
     Base.inv(g::MonoidGen{T}) where T = MonoidGen{T}(g.id, p=-g.exp)
     Base.isequal(a::MonoidGen{T}, b::MonoidGen{T}) where T = a.id==b.id && (a/b).id==0
 
 
     
-    mutable struct MonoidWord{T<:Integer}<:AbstractMonoidWord
-        word::Vector{MonoidGen{T}}
-        last::MonoidGen{T}
+    mutable struct MonoidWord{T<:AbstractMonoidGen}<:AbstractMonoidWord
+        word::Vector{T}
+        last::T
         exp::Int
-        MonoidWord{T}(x::Vector{S}; exp=1) where {T, S<:AbstractMonoidGen} = 
-            isempty(x) ?    MonoidWord{T}([MonoidGen{T}(0)]) : 
-                            new{T}([one(x[end]), x[1:end-1]...], x[end], exp)
+        MonoidWord{S}(x::Vector{S}; exp=1) where {S<:AbstractMonoidGen} = 
+            isempty(x) ?    new{S}(S[], S(0), 0) : 
+                            new{S}([one(x[end]), x[1:end-1]...], x[end], exp)
         # parent::Monoid
     end
 
     # MonoidElement{S}(x::MonoidGen{T}) where {T, S}  = MonoidElement{S}([x])
-    MonoidWord(x...; exp=1)  = MonoidWord{DEFAULT_INT}(x...; exp)
+    MonoidWord(x...; exp=1)  = MonoidWord{MonoidGen{DEFAULT_INT}}(x...; exp)
 
-    MonoidWord{S}(x::Vector{T}; exp=1) where {S<:Integer, T<:Number}  = prod(map(MonoidGen, S.(x)))^exp
+    MonoidWord{S}(x::Vector{T}; exp=1) where {S<:AbstractMonoidGen, T<:Number}  = prod(S.(x))^exp
 
-    MonoidWord{T}(x::MonoidWord{T}; exp=1) where T  = x^exp::MonoidWord{T}
-    MonoidWord{T}(x::MonoidGen{S}; exp=1) where {T, S}  = MonoidWord{T}([x^exp])
-    Base.one(x::MonoidWord{T}) where T = MonoidWord{T}([one(x.last)])
+    MonoidWord{T}(x::MonoidWord{T}; exp=1) where T  = (x^exp)::MonoidWord{T}
+    MonoidWord{T}(x::T; exp=1) where {T<:AbstractMonoidGen}  = MonoidWord{T}(T[x^exp])
+    Base.one(x::MonoidWord{T}) where T<:AbstractMonoidGen = MonoidWord{T}(T[])
     Base.length(x::MonoidWord{T}) where T = sum([abs(x.exp) for x in gens(x)])
 
     Base.copy!(dest::MonoidWord{T}, src::MonoidWord{T}) where T = begin
@@ -71,36 +72,37 @@ const SEP = ""
         dest.last = src.last
         dest.exp = src.exp
     end
-    Base.promote_rule(::Type{MonoidGen{T}}, ::Type{S}) where {T<:Integer, S<:AbstractMonoidWord} = S
-    Base.promote_rule(::Type{S}, ::Type{MonoidGen{T}}) where {T<:Integer, S<:AbstractMonoidWord} = S
+    Base.promote_rule(::Type{T}, ::Type{S}) where {T<:AbstractMonoidGen, S<:AbstractMonoidWord} = S
+    Base.promote_rule(::Type{S}, ::Type{T}) where {T<:AbstractMonoidGen, S<:AbstractMonoidWord} = S
 
     Base.promote_rule(::Type{MonoidGen{S}}, ::Type{MonoidGen{T}}) where {T<:Integer, S<:Integer} = MonoidGen{promote_type{T,S}}
+    Base.promote_rule(::Type{MonoidWord{S}}, ::Type{MonoidWord{T}}) where {T, S} = MonoidWord{promote_type{T,S}}
     
     function Base.convert(::Type{T}, x::MonoidGen{S}) where {T<:AbstractMonoidWord, S<:Integer}
         T(x)::T
     end
 
     function (::Type{T})(x::AbstractMonoidGen) where T <: Integer
-        T(x.id)        
+        T(x.id)::T
     end
 
     function Base.:*(a::T, b::S) where {T<:AbstractMonoidElement,S<:AbstractMonoidElement}
         _mul(promote(a,b)...)
     end
 
-    function _mul(a::MonoidGen{T}, b::MonoidGen{T})::Union{MonoidGen, MonoidWord} where T
+    function _mul(a::T, b::T)::Union{MonoidGen, MonoidWord} where T<:AbstractMonoidGen
         
         ((a.id*b.id) == 0 || a.id == b.id) && 
-            return MonoidGen(max(a.id, b.id); p = a.exp+b.exp)
+            return T(max(a.id, b.id); p = a.exp+b.exp)
         
-        MonoidWord([a,b])
+        MonoidWord{T}(T[a,b])
     end
 
     
-    Base.inv(x::MonoidWord{T}) where T  = 
-        MonoidWord{T}(collect(gens(x, 1)); exp=-x.exp)
+    Base.inv(x::T) where T<:AbstractMonoidWord  = 
+        T(collect(gens(x; p= 1)); exp=-x.exp)
 
-    Base.:^(x::MonoidWord{T}, n::Integer) where T = MonoidWord{T}(collect(gens(x, 1)); exp=n*x.exp)
+    Base.:^(x::T, n::Integer) where T<:AbstractMonoidWord = T(collect(gens(x; p=1)); exp=n*x.exp)
 
     Base.:^(x::MonoidGen{T}, n::Integer) where T = MonoidGen{T}(x.id; p=n*x.exp)
 
@@ -108,20 +110,21 @@ const SEP = ""
     Base.:\(x::AbstractElement, y::AbstractElement) = inv(x) * (y)
     Base.:^(x::AbstractElement, y::AbstractElement) = inv(y) * x * (y)
 
-    function gens(x::MonoidWord)
-        p = x.exp
-        elem = flatten((x.word[2:end],[ x.last]))
-        p > 0 ? cycle(elem, p) : 
-                cycle(elem, -p)     |>
-                Iterators.reverse   |>
-                z -> map(e->-e, z)
-    end
+    # function gens(x::AbstractMonoidWord)
+    #     p = x.exp
+    #     elem = flatten((x.word[2:end],[ x.last]))
+    #     p > 0 ? cycle(elem, p) : 
+    #             cycle(elem, -p)     |>
+    #             Iterators.reverse   |>
+    #             z -> map(e->-e, z)
+    # end
 
-    function gens(x::MonoidGen)
+    function gens(x::AbstractMonoidGen)
         [x]
     end
 
-    function gens(x::MonoidWord, p::Int)
+
+    function gens(x::T; p::Int = x.exp) where T <: AbstractMonoidWord
         elem = flatten((x.word[2:end],[ x.last]))
         p > 0 ? cycle(elem, p) : 
                 cycle(elem, -p)     |>
@@ -129,14 +132,15 @@ const SEP = ""
                 z -> map(e->-e, z)
     end
 
-    function eachgen(x::MonoidWord)
-        flatmap(c->cycle([MonoidGen(c.id; p = sign(c.exp))], abs(c.exp)), gens(x))
+    function eachgen(x::MonoidWord{T}) where T
+        flatmap(c->cycle([T(c.id; p = sign(c.exp))], abs(c.exp)), gens(x))
     end
 
     function _mul(a::MonoidWord{T}, b::MonoidWord{T})::MonoidWord{T} where T
-        word = MonoidGen{T}[]
+        word = copy(a.word)
+        empty!(word)
         final = one(a.last)
-        for (gen) in (flatten((gens(a), gens(b))))
+        for (gen) in (flatten([gens(a), gens(b)]))
             if final.id == 0 
                 final = gen
             elseif (final.id == gen.id )
@@ -151,7 +155,7 @@ const SEP = ""
             end
         end
         final.id!=0 && push!(word, final)
-        MonoidWord(word)
+        MonoidWord{T}(word)
     end
 
     function expand!(w::AbstractMonoidElement)
@@ -193,13 +197,13 @@ const SEP = ""
         print(io, "$(genName(c; id=true))")
     end
 
-    function Base.show(io::IO,  x::MonoidWord{T}) where T
-        elem = x.exp==1 ? join(["$(genName(c; id=false))" for c in gens(x, 1)], "$SEP") : "($(join(["$(genName(c))" for c in gens(x, 1)], "$SEP")))$(UnicodeFun.to_superscript(x.exp))"
+    function Base.show(io::IO,  x::AbstractMonoidWord) 
+        elem = x.exp==1 ? join(["$(genName(c; id=false))" for c in gens(x; p=1)], "$SEP") : "($(join(["$(genName(c))" for c in gens(x; p=1)], "$SEP")))$(UnicodeFun.to_superscript(x.exp))"
         print(io, elem*"")
     end
 
     function prettyrepr(x::MonoidWord{T}) where T
-        elem = x.exp==1 ? join(["$(genName(c; upperinv=true, id=false))" for c in gens(x, 1)], "$SEP") : "($(join(["$(genName(c; upperinv=true))" for c in gens(x, 1)], "$SEP")))$(UnicodeFun.to_superscript(x.exp))"
+        elem = x.exp==1 ? join(["$(genName(c; upperinv=true, id=false))" for c in gens(x; p=1)], "$SEP") : "($(join(["$(genName(c; upperinv=true))" for c in gens(x; p=1)], "$SEP")))$(UnicodeFun.to_superscript(x.exp))"
         elem
     end
 
@@ -238,18 +242,23 @@ const SEP = ""
 
         elems = ([first(c) for c in takewhile(c->isequal(c...), itr)])
         Iterators.reset!(itr)
-        nxt = first(dropwhile(c->isequal(c...), itr))
+        nxt = Iterators.peel(dropwhile(c->isequal(c...), itr))
         isnothing(nxt) && return MonoidWord(elems)
         
-        MonoidWord(elems) * gcp(nxt...)    
+        MonoidWord(elems) * gcp(nxt[1]...)    
     end
 
-    function element(s::AbstractString)::MonoidWord{DEFAULT_INT}
-        ms = eachmatch(r"(?<gen>(?:[A-Z]|[a-z])\d*)(?:[\s\^](?<power>-?\d*))?[\s\*]*", s)
+    function element(s::AbstractString)::MonoidWord
+        ms = eachmatch(r"(?<minus>-?)(?<gen>(?:[A-Z]|[a-z])\d*)(?:[\s\^](?<power>-?\d*))?[\s\*]*", s)
         
         matches = map(ms) do m
             exp =  m[:power]
+            sgn = m[:minus]
             pow = isnothing(exp) || isempty(exp) ? 1 : parse(Int, exp)
+
+            pow = isnothing(sgn) || isempty(sgn) ? pow : -pow
+
+
             MonoidGen(m[:gen]; p=pow)
         end
 

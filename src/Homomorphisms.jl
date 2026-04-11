@@ -24,7 +24,7 @@ struct Hom{G1<:AbstractGroup, G2<:AbstractGroup}
 end
 
 
-function (ϕ::Hom{G1, G2})(g::AbstractElement) where {G1<:AbstractGroup, G2<:AbstractGroup} 
+function (ϕ::Hom{G1, G2})(g::Farey.FreeGroupElement) where {G1<:AbstractGroup, G2<:AbstractGroup} 
     # g.parent==ϕ.dom || error("$g is not in the domain of $ϕ = $(ϕ.dom)")
     mapping = ϕ.image
     prod([ϕ.codom(mapping[x]) for x in g.word], init=one(g.parent))
