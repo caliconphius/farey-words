@@ -1,17 +1,19 @@
 module SuffixTrees
     using FixedSizeArrays
+    import AbstractTrees as atr
     using ..Monoids
+    using ..Monoids:AbstractCyclicGen, AbstractFreeGen
     using ..Interfaces:AbstractElement,AbstractMonoidElement
     using Farey:FreeGroupElement
-    include("alphabet.jl")
+    include("colors.jl")
 
 
     abstract type AbstractNode end
-    abstract type AbstractTree end
+    abstract type AbstractSuffixTree end
     const ALPHABET_SIZE = 2 * 0xff
     const FINAL_CHAR = (ALPHABET_SIZE)
     const FINAL_SYM = "#"
-    
+
 #
 mutable struct SuffixNode <: AbstractNode
     position::Int
@@ -21,6 +23,7 @@ mutable struct SuffixNode <: AbstractNode
     label::String
     next::FixedSizeArray{Int}
     slink::Int
+    tree::Union{AbstractSuffixTree, Nothing}
 
     function SuffixNode(
         position::Int,
@@ -32,11 +35,23 @@ mutable struct SuffixNode <: AbstractNode
     )
         next = FixedSizeVector{Int}(undef, ALPHABET_SIZE)
         next .= 0
-        new(position, len, parent, suffix, label, next, slink)
+        new(position, len, parent, suffix, label, next, slink, nothing)
 
     end
 end
 
+function atr.children(nd::T) where T <: AbstractNode
+    out = [nd.tree[nd.next[k]] for k in findall(nd.next .!== 0)]
+    # reverse!(out)
+end
+
+function atr.nodevalue(nd::T) where T <: AbstractNode
+    subword(nd.tree , nd)
+end
+
+function atr.printnode(io::IO, nd::T) where T <: AbstractNode
+    print(io, "(+$(edgeword(nd.tree, nd)))-<$(nd.label)>-$(subword(nd.tree , nd))$(nd.suffix ? "#" : "...")")
+end
 
 #
         # function iterate(tr::SuffixTree{T})
@@ -47,7 +62,7 @@ end
         # end
 
         # function iterate(tr::SuffixTree{T}, state)
-        #     state.edge === nothing  && return nothing 
+        #     state.edge === nothing  && return nothing
         #     node = tr[state.node].parent
         #     pos = node.position
         #         node = tr[state.node].next[state.edge]
@@ -71,8 +86,8 @@ end
         #     cr==FINAL_CHAR && continue
         #       nd = tr[ndix]
 
-        #       edgename =  nd.position > tr.lw ?  error("Oh no,,, I have added an implementation error :(") : 
-        #               nd.len>-1           ?   repr(Gr(tr.word[nd.position:nd.position+nd.len-1])) : 
+        #       edgename =  nd.position > tr.lw ?  error("Oh no,,, I have added an implementation error :(") :
+        #               nd.len>-1           ?   repr(Gr(tr.word[nd.position:nd.position+nd.len-1])) :
         #                                       repr(Gr(tr.word[nd.position:end]))*Char(FINAL_CHAR)
 
 
@@ -89,7 +104,7 @@ end
         #               "\n"
 
         #       depth = parent+1
-        #       spacer =(spaceb)^(parent) 
+        #       spacer =(spaceb)^(parent)
         #       nodename = "<$(nd.label)>"
 
         #       if isempty(chdn)
@@ -113,7 +128,7 @@ end
 
         # IteratorSize(::Type{<:Accumulate{<:Any,I}}) where {I} = IteratorSize(I)
         # IteratorEltype(::Type{<:Accumulate}) = EltypeUnknown()
-mutable struct SuffixTree{T} <: AbstractTree where {T}
+mutable struct SuffixTree{T} <: AbstractSuffixTree where {T}
     word::T
     tree::Vector{SuffixNode}
     len::Int
@@ -131,11 +146,11 @@ mutable struct SuffixTree{T} <: AbstractTree where {T}
 
 end
 
-function Base.getindex(tr::AbstractTree, i::Integer)
+function Base.getindex(tr::AbstractSuffixTree, i::Integer)
     tr.tree[i+1]
 end
 
-function Base.getindex(tr::AbstractTree, i::AbstractUnitRange)
+function Base.getindex(tr::AbstractSuffixTree, i::AbstractUnitRange)
     tr.tree[i.+1]
 end
 
@@ -143,13 +158,15 @@ function edgelength(nd::SuffixNode, idx)
     nd.len > -1 ? nd.len : idx - nd.position
 end
 
-function edgelength(tr::AbstractTree, nd::SuffixNode)
+function edgelength(tr::AbstractSuffixTree, nd::SuffixNode)
     nd.len > -1 ? nd.len  : tr.lw - nd.position+1
 end
 
-function edgelength(tr::AbstractTree, nd::Int)
+function edgelength(tr::AbstractSuffixTree, nd::Int)
     edgelength(tr, tr[nd])
 end
+
+
 
 text(tr::SuffixTree{S}, pos::Int) where S<:AbstractElement = pos > tr.lw ? FINAL_CHAR : genId(word(tr.word)[pos])::Int
 
@@ -165,10 +182,16 @@ function text(tr::SuffixTree{S})::Vector{Int} where S<:AbstractMonoidElement
     Int[genId(x) for x in Monoids.eachgen(tr.word)]
 end
 
-function genId(x::AbstractMonoidElement)::Int
+function genId(x::T)::Int where T<:AbstractFreeGen
     x.id < 0xff || error("$(x.id) ($x) is an invalid index for building suffix trees (ALPHABET_SIZE = $ALPHABET_SIZE)")
-    x.exp == 1 && return Int(x.id)
-    x.exp == -1 && return 0xff + Int(x.id) -1
+    (x.exp == -1)⊻x.inv && return 0xff + Int(x.id) -1
+    return Int(x.id)
+
+end
+
+function genId(x::T)::Int where T<:AbstractCyclicGen
+    id(x) < 0xff || error("$(id(x)) of ($x) is an invalid id for building suffix trees (ALPHABET_SIZE = $ALPHABET_SIZE)")
+    return Int(x|>id)
 
 end
 
@@ -187,12 +210,12 @@ function next(tr::SuffixTree, t::Int, len::Int; idx::Int=0)::Tuple{Int, Int}
     len = min(edgelength(tr, nxt), lx - edge+1)-1
     pos = tr[nxt].position
     (txt[pos:pos+len]==x[edge:edge+len]) || return (0, 0)
-    
+
     idx = nxt
     edge+len < lx || break
     edge += len+1
     end
-    
+
 
     return idx, edge
 end
@@ -207,17 +230,17 @@ function walktree(tr::SuffixTree, x::Vector{Int}; idx::Int=0)::Tuple{Int, Int}
     len = min(edgelength(tr, nxt), lx - edge+1)-1
     pos = tr[nxt].position
     (txt[pos:pos+len]==x[edge:edge+len]) || return (0, 0)
-    
+
     idx = nxt
     edge+len < lx || break
     edge += len+1
     end
-    
+
 
     return idx, edge
 end
 
-function next(tr::SuffixTree,  pos::Int;idx::Int=0)::Int 
+function next(tr::SuffixTree,  pos::Int;idx::Int=0)::Int
     edge = text(tr, pos)
     tr[idx].next[edge]
 end
@@ -234,13 +257,13 @@ end
     #             node = nxt
     #             len  = edgelength(tr, nxt)
     #         else
-                
+
     #         end
 
     #     end
     #     return node
     # end
-    
+
 # function πw(tr, txt::Vector{Int})::Int
 
 #     node, edge = walktree(tr, txt)
@@ -256,39 +279,40 @@ function suffixes(tr::SuffixTree)
 end
 
 
-function arrow(nd::AbstractNode, tr::AbstractTree)
+function arrow(nd::AbstractNode, tr::AbstractSuffixTree)
     nd.len > -1 ? tr.word[nd.position:nd.position+nd.len-1] :
     tr.word[nd.position:end]
 end
 
-function Base.push!(tr::AbstractTree, nd::AbstractNode)
+function Base.push!(tr::AbstractSuffixTree, nd::AbstractNode)
     push!(tr.tree, nd)
+    nd.tree = tr
     tr.len += 1
     tr.len
 end
 
 
-function nodepath(tr::AbstractTree, idx::Int)
+function nodepath(tr::AbstractSuffixTree, idx::Int)
     nodepath(tr, tr[idx])
 end
 
-function nodepath(tr::AbstractTree, node::AbstractNode)
+function nodepath(tr::AbstractSuffixTree, node::AbstractNode)
     wordl = node.position
 
-    while node.parent != 0
+    while node.parent !== 0
         node = tr[node.parent]
         wordl -= node.len
     end
     wordl
 end
 
-function issuffix(tr::AbstractTree, idx::Int)::Bool
+function issuffix(tr::AbstractSuffixTree, idx::Int)::Bool
     nd = tr[idx]
-    nd.suffix || nd.next[FINAL_CHAR] > 0       
+    nd.suffix || nd.next[FINAL_CHAR] > 0
 end
 
 function children(nd::AbstractNode)
-    out = [(k, nd.next[k]) for k in findall(nd.next .!= 0)]
+    out = [(k, nd.next[k]) for k in findall(nd.next .!== 0)]
     reverse!(out)
 end
 
@@ -306,7 +330,7 @@ function Base.show(io::IO, nd::AbstractNode)
             "  ⋅→-{$(nd.position):$(finish)}-<$(nd.label)>",
             "⋅$sl",
             # "|-SL→ $slink;\n"
-            # "}\n" 
+            # "}\n"
         ], "\n")
     print(io, nodename)
 end
@@ -316,13 +340,13 @@ end
         subword(tr, nd)
     end
 
-function subword(tr::SuffixTree{S}, nd::AbstractNode) where S<:AbstractString
+# function subword(tr::SuffixTree{S}, nd::AbstractNode) where S<:AbstractString
 
-    edge = nd.position > tr.lw ? "" :
-        nd.len > -1 ? "$(tr.word[nd.position:nd.position+nd.len-1])" :
-        "$(tr.word[nd.position:end])"
-    "$((tr.word[nodepath(tr, nd):nd.position-1])|>prod)" * edge
-end
+#     edge = nd.position > tr.lw ? "" :
+#         nd.len > -1 ? "$(tr.word[nd.position:nd.position+nd.len-1])" :
+#         "$(tr.word[nd.position:end])"
+#     "$((tr.word[nodepath(tr, nd):nd.position-1])|>prod)" * edge
+# end
 
 function printpath(tr::SuffixTree{S}, idx::Int) where S
     nd = tr[idx]
@@ -344,7 +368,7 @@ function printpath(tr::SuffixTree{S}, idx::Int) where S
         out = " + ($(edg))" * out
         # out = "\n|"*out
 
-        nd.parent != 0 || break
+        nd.parent !== 0 || break
         nd = tr[nd.parent]
         wd = subword(tr, nd)
         out = "  : $(edg[1])...\n⋅-" * "-"^(length(repr(wd))) * "→" * out
@@ -381,7 +405,7 @@ end
     #         nd = tr[ndix]
 
     #         edge =  nd.position > tr.lw ?   Char.(FINAL_CHAR) :
-    #                 nd.len>-1           ?   "$(word[nd.position:nd.position+nd.len-1])" : 
+    #                 nd.len>-1           ?   "$(word[nd.position:nd.position+nd.len-1])" :
     #                                         "$(word[nd.position:end])~"
 
     #         subword = "$(word[node_word(tr, ndix):nd.position-1])"*edge
@@ -398,7 +422,7 @@ end
     #                 "\n"
 
     #         depth = parent+1
-    #         spacer =(spaceb)^(parent) 
+    #         spacer =(spaceb)^(parent)
 
     #         if isempty(chdn)
     #             edgearrow = " ⋅--($edgename)-"
@@ -415,7 +439,7 @@ end
     #     print(io, out)
     # end
 
-function reprtree(tr::AbstractTree)
+function reprtree(tr::AbstractSuffixTree)
     root = tr[0]
     depth = 1
     parent = 0
@@ -478,7 +502,7 @@ function reprtree(tr::AbstractTree)
                 "|-SL→ $slink\n",
                 "⋅----\n",
                 # "|-SL→ $slink;\n"
-                # "}\n" 
+                # "}\n"
             ], sep)
         out *= spacer *
             edgearrow *
@@ -604,7 +628,7 @@ end
 function SuffixTree(w::S)::SuffixTree{S} where S
     root = SuffixNode(1, 0, false, "root"; len=0)
     tr = SuffixTree{S}(w, SuffixNode[root], 0)
-
+    setfield!(root, :tree, tr)
     _build_tree!(tr)
     tr
 
@@ -653,7 +677,7 @@ function Base.show(io::IO, tr::SuffixTree)
             # out *= spacer * " |\n"
             out *= "$(spacer)$spaceb \n"
             edgearrow = " ⋅→-($edgename)-⋅"
-            #   edgearrow = " ⋅-$edgename-" 
+            #   edgearrow = " ⋅-$edgename-"
             out *= spacer *
                 edgearrow *
                 nodename * " : $(subword(tr, ndix))$FINAL_SYM\n"
@@ -678,7 +702,7 @@ function Base.show(io::IO, tr::SuffixTree)
 
                 out *= "$(spacer)$(spaceb) ⋅→-⋅($FINAL_SYM)-⋅<$(tr[suff].label)> : $(subword(tr, tr[ndix].next[FINAL_CHAR]))$FINAL_SYM\n"#*"[$(tr[suff].position):#]\n"
                 out *= "$(spacer)$(spaceb) |   \n"
-                filter!(x->x[2]!=FINAL_CHAR, chdn)
+                filter!(x->x[2]!==FINAL_CHAR, chdn)
             end
 
             [pushfirst!(stack, (depth, x...)) for x in chdn]
@@ -702,11 +726,20 @@ function edgeword(tr::SuffixTree{S}, nd::AbstractNode) where S
     subwd
 end
 
+function subword(tr::SuffixTree{S}, node::AbstractNode) where S<:AbstractString
+    word = edgeword(tr, node)
+
+    while node.parent !== 0
+        word = edgeword(tr, node.parent) * word
+        node = tr[node.parent]
+    end
+    word
+end
 
 function subword(tr::SuffixTree{S}, node::AbstractNode) where S<:AbstractElement
     word = edgeword(tr, node)
 
-    while node.parent != 0
+    while node.parent !== 0
         word = edgeword(tr, node.parent) * word
         node = tr[node.parent]
     end
@@ -833,7 +866,7 @@ function showtree(tr::SuffixTree)
         if isempty(chdn)
             # out *= spacer * " |\n"
             edgearrow = " ⋅→-$edgelabel-⋅ "
-            #   edgearrow = " ⋅-$edgename-" 
+            #   edgearrow = " ⋅-$edgename-"
             out *= spacer *
                 edgearrow *
                 nodename * "\n"
@@ -874,7 +907,7 @@ function dotfile!(tr::SuffixTree, fname::AbstractString; cscheme="rdylgn11", dir
     node_word(nd) = "{$(to_string(subword(tr, nd))|>x->replace(x, "."=>""))}"
     # edgelabel = "$(tr.word[nd.position])"
     # finish = nd.len > -1 ? nd.position + nd.len : "#"
-# label=\"$(nd.label)\", 
+# label=\"$(nd.label)\",
     nodes = [
         "n$(nd.label) "*
         "[label=\"$(nd.label) : \n"*
@@ -883,7 +916,7 @@ function dotfile!(tr::SuffixTree, fname::AbstractString; cscheme="rdylgn11", dir
         "group=\"$(nd.parent)\","*
         "fontcolor=\"$(TEXTCOLORS[parse(Int,nd.label)%length(TEXTCOLORS)+1])\"];\n"
          for nd in tr.tree[2:end]
-            
+
     ]
     edges = ["n$(nd.parent) -> n$(nd.label) [label=\"($(edgename(nd)))\", fontcolor=\"$(cmap(nd))\", color=\"$(cmap(nd))\"];\n" for nd in tr.tree[2:end]]
     dot_temp = """
@@ -950,7 +983,7 @@ end
     #         next .= 0
 
     #         new{T}(ImplicitRange(edge), parent, next, label, slink)
-                
+
     #         end
     # end
 
@@ -1070,8 +1103,3 @@ end
     # #       [Int(x) for x in w.word]
     # #   end
 end
-
-
-
-
-

@@ -1,8 +1,9 @@
 module Monoids
-using Farey:AbstractMonoid
+using Farey: AbstractMonoid
 include("MonoidWords.jl")
-
-struct FreeMonoid <: AbstractMonoid end
+include("CyclicWords.jl")
+include("MonoidHoms.jl")
+# struct FreeMonoid <: AbstractMonoid end
 
 
 

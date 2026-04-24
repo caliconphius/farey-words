@@ -1,5 +1,5 @@
 
-struct FreeGroup<: AbstractGroup 
+struct FreeGroup<: AbstractGroup
     ngens::UInt
     monoid::GPC.Monoid
     alphabet::KB.Alphabet
@@ -41,6 +41,7 @@ function Base.getindex(g::FreeGroupElement, I::Union{UnitRange, Integer})
     return g.parent(g.word[I])
 end
 
+Base.length(c::FreeGroupElement) = length(c.word)
 Base.lastindex(c::FreeGroupElement) = length(c)
 
 function Base.:(==)(g::FreeGroupElement, h::FreeGroupElement)
@@ -48,7 +49,7 @@ function Base.:(==)(g::FreeGroupElement, h::FreeGroupElement)
 end
 
 function Base.inv(g::FreeGroupElement)
-    return (C = parent(g); C(inv(g.elem)))
+    return (C = parent(g); C(KB.inv(g.word, C.alphabet)))
 end
 
 function Base.:(*)(g::FreeGroupElement, h::FreeGroupElement)
@@ -77,10 +78,10 @@ function FreeGroup(Sym::NamedTuple)
     ε = one(f)
 
     R = KB.RewritingSystem(
-        [(f*F,ε)],   
+        [(f*F,ε)],
         KB.LenLex(A),
     )
-    
+
     G = MON.FPMonoid(R)
     FreeGroup(N, G)
 
@@ -93,7 +94,7 @@ end
 function FreeGroup(N::Integer; lett="g")
     syms = (;(Symbol(lett, i)=>Symbol(lett, i,"⁻") for i in 1:N)...)
     FreeGroup(syms)
-end 
+end
 
 function Base.show(io::IO,  C::FreeGroup)
     if get(io, :compact, false)::Bool
@@ -123,8 +124,8 @@ end
 function pretty_rep(c::FreeGroupElement)
     unpretty = repr(c.parent.monoid(c.word))
     pretty = unpretty                                       |>
-                x -> replace(x, "*" =>  ".")                |> 
-                x -> replace(x, r"\^(\d+)" =>  s"^{\1}")    |> 
+                x -> replace(x, "*" =>  ".")                |>
+                x -> replace(x, r"\^(\d+)" =>  s"^{\1}")    |>
                 UnicodeFun.to_latex
     pretty
 end
