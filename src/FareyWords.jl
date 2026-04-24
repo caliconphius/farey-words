@@ -6,29 +6,35 @@ function christoffel(X::Number, a::AbstractElement, b::AbstractElement)
 
     if abs(X) > 1
         x,y = (b,a)
-    
+
         Q = ContinuedFraction(1/X) |> positive_form
     else
         x,y = (a,b)
         Q = ContinuedFraction(X) |> positive_form
     end
-    
-    
-    Ω0 = x
-    Ω∞ = y
-    Ω1 = Ω0*Ω∞
-    for (k,l) in enumerate(Q.L)
-        Ω1 =  k%2==1 ? Ω0^abs(l)*Ω∞ : Ω∞*Ω0^abs(l)
-        Ω∞ = Ω0
-        Ω0 = Ω1
+
+    if Q<0
+        x, y = (x, inv(y))
+        Q = abs(Q)
     end
 
-    if X < 0
-        F = x.parent
-        T = Hom(F, F, (x=>x, y=>inv(y)))
-        return T(Ω1)
+    ΩL = x
+    ΩR = x*y
+    Ω = x*y
+    for (k,l) in (enumerate(Q.L))
+        if k%2==1
+            ΩR = ΩL^(abs(l)-1)*ΩR
+            ΩL = ΩL*ΩR
+            Ω = ΩR
+        else
+            ΩL = ΩL*ΩR^(abs(l)-1)
+            # ΩR = ΩL*ΩR
+            ΩR = ΩL*ΩR
+            Ω = ΩL
+        end
     end
-    Ω1
+
+    Ω
     # triple = (Ω0=Ω0, Ω∞=Ω∞, Ω=Ω1)
     # triple.Ω
 end
@@ -42,36 +48,39 @@ end
 
 
 function palindrome(f, g, n)
-    (f*g)^(n÷2) * f^(n%2)
+    ((f*g)^((n+1)÷2))[1:n]
 end
 
 function shrink_cf(c::Number)
     c = ContinuedFraction(c)
-    c = c.leading!=0 ? one(c)/c : c
+    c = c.leading!==0 ? one(c)/c : c
     q = c.L
     length(q) == 1 && return one(c)
-    q[2] == 1 ? 
-        ContinuedFraction(0, q[3:end]) : 
-        ContinuedFraction(0, [q[2]-1, q[3:end]...])  
+    q[2] == 1 ?
+        ContinuedFraction(0, q[3:end]) :
+        ContinuedFraction(0, [q[2]-1, q[3:end]...])
 end
 
 
 
 
 function s_seq(c::ContinuedFraction)
-    _M2 = FreeGroup("a", "b")
-    _m1, _m2 = [_M2(x) for x in 1:_M2.ngens]
+    _m1, _m2 = Monoids.FreeGen("m1 m2")
+    mid = _m1.id
     c = positive_form(c)
     0<=Rational(c)<=1 || error("Farey words/S sequences are currently only implemented for positive rationals <= 1, results for numbers outside this range may be inaccurate")
     Rational(c)==0//1 && return [2]
     ω = christoffel(c, _m1, _m2)^2
-    Rational(c)==0//1 && return [2]
-    ω.parent.monoid(ω.word)                     |>
-        repr                                    |>
-        x-> replace(x, "a*b"=>"a^1*b")          |>
-        x-> replace(x, r"a\^(\d+)\*b"=>s"\1")   |>
-        x-> split(x, "*")                      .|>
-        x-> parse(Int, x)
+
+    Monoids.gens(ω)             |>
+    z->ITR.filter(x->x.id==mid, z)  |>
+    z->map(x->x.exp, z)
+    # ω.parent.monoid(ω.word)                     |>
+    #     repr                                    |>
+    #     x-> replace(x, "a*b"=>"a^1*b")          |>
+    #     x-> replace(x, r"a\^(\d+)\*b"=>s"\1")   |>
+    #     x-> split(x, "*")                      .|>
+    #     x-> parse(Int, x)
 end
 
 
@@ -89,7 +98,7 @@ function farey_word(c::Number, f, g)
         nextpair, an
     end .|> last |> prod
     out
-    
+
  end
 
 
@@ -111,5 +120,3 @@ end
 #         vcat(repeat([m], x),[m+1])
 #     end |> collect |> reverse
 # end
-
-
